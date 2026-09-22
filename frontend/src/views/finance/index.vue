@@ -246,25 +246,101 @@
       </div>
 
       <!-- Channel Charts: Revenue Distribution & Conversion -->
-      <div class="kn-charts-grid">
-        <div class="kn-card kn-chart-card">
+      <div class="kn-charts-grid kn-channel-analytics-grid">
+        <!-- 1. Donut Revenue Distribution Card -->
+        <div class="kn-card kn-chart-card kn-channel-pie-card">
           <div class="kn-chart-header">
             <div>
               <h3 class="kn-chart-title font-brand">Доли Выручки по Каналам</h3>
               <p class="kn-chart-sub">Instagram vs WhatsApp vs Telegram vs Салон</p>
             </div>
+            <div class="kn-chart-total-pill font-outfit">
+              Всего: {{ formatMoney(totalChannelsRevenue) }} ₽
+            </div>
           </div>
-          <div ref="channelPieChartRef" class="kn-echarts-box"></div>
+
+          <div class="kn-donut-container">
+            <div ref="channelPieChartRef" class="kn-echarts-donut"></div>
+          </div>
+
+          <!-- Native Luxury Legend Breakdown -->
+          <div class="kn-channel-legend-list">
+            <div 
+              v-for="ch in channelAnalytics" 
+              :key="ch.channel" 
+              class="kn-channel-legend-item"
+            >
+              <div class="kn-legend-left">
+                <span class="kn-legend-dot" :class="ch.channel.toLowerCase()"></span>
+                <span class="kn-legend-name">{{ formatChannelShort(ch.channel) }}</span>
+              </div>
+              <div class="kn-legend-right">
+                <span class="kn-legend-val font-outfit">{{ formatMoney(ch.totalRevenue) }} ₽</span>
+                <span class="kn-legend-pct font-outfit" :class="ch.channel.toLowerCase()">
+                  {{ getChannelPercent(ch.totalRevenue) }}%
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="kn-card kn-chart-card">
+        <!-- 2. Horizontal Conversion Funnel Card -->
+        <div class="kn-card kn-chart-card kn-channel-conv-card">
           <div class="kn-chart-header">
             <div>
               <h3 class="kn-chart-title font-brand">Конверсия в Пошив (%)</h3>
-              <p class="kn-chart-sub">Эффективность обработки лидов</p>
+              <p class="kn-chart-sub">Эффективность обработки лидов по каналам</p>
+            </div>
+            <div class="kn-chart-badge font-outfit">
+              Воронка продаж
             </div>
           </div>
-          <div ref="channelBarChartRef" class="kn-echarts-box"></div>
+
+          <div class="kn-channel-conversion-board">
+            <div 
+              v-for="ch in channelAnalytics" 
+              :key="ch.channel" 
+              class="kn-conv-row-card"
+              :class="ch.channel.toLowerCase()"
+            >
+              <div class="kn-conv-row-header">
+                <div class="kn-conv-channel-info">
+                  <div class="kn-conv-icon-wrap" :class="ch.channel.toLowerCase()">
+                    <Instagram v-if="ch.channel === 'INSTAGRAM'" :size="15" />
+                    <MessageSquare v-else-if="ch.channel === 'WHATSAPP'" :size="15" />
+                    <Send v-else-if="ch.channel === 'TELEGRAM'" :size="15" />
+                    <Crown v-else :size="15" />
+                  </div>
+                  <span class="kn-conv-channel-name">{{ formatChannelShort(ch.channel) }}</span>
+                </div>
+                <div class="kn-conv-badge font-outfit">
+                  <span class="kn-conv-rate">{{ ch.conversionToOrder }}%</span>
+                  <span class="kn-conv-label">в заказ</span>
+                </div>
+              </div>
+
+              <!-- Animated gradient progress bar -->
+              <div class="kn-conv-progress-track">
+                <div 
+                  class="kn-conv-progress-fill" 
+                  :class="ch.channel.toLowerCase()"
+                  :style="{ width: `${Math.min(100, Math.max(6, ch.conversionToOrder))}%` }"
+                ></div>
+              </div>
+
+              <div class="kn-conv-row-details font-outfit">
+                <span class="kn-conv-funnel-step">
+                  <strong class="text-white">{{ ch.ordersCount }}</strong> зак. из <strong class="text-white">{{ ch.leadsCount }}</strong> лидов
+                </span>
+                <span class="kn-conv-substat">
+                  Визит: <strong class="text-gold">{{ ch.conversionToAppointment }}%</strong>
+                </span>
+                <span class="kn-conv-substat">
+                  Чек: <strong class="text-white">{{ formatMoney(ch.avgCheck) }} ₽</strong>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -732,7 +808,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, shallowRef, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, shallowRef, watch } from 'vue';
 import { api } from '@/utils/request';
 import { useResponsive } from '@/utils/useResponsive';
 import { ElMessage } from 'element-plus';
@@ -767,6 +843,25 @@ const cashAccounts = ref<any[]>([]);
 const cashTransactions = ref<any[]>([]);
 const purchases = ref<any[]>([]);
 const orderEconomics = ref<any[]>([]);
+
+const totalChannelsRevenue = computed(() => {
+  return channelAnalytics.value.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+});
+
+const getChannelPercent = (revenue: number) => {
+  if (!totalChannelsRevenue.value || !revenue) return '0.0';
+  return ((revenue / totalChannelsRevenue.value) * 100).toFixed(1);
+};
+
+const formatChannelShort = (chKey: string) => {
+  switch (chKey) {
+    case 'INSTAGRAM': return 'Instagram';
+    case 'WHATSAPP': return 'WhatsApp';
+    case 'TELEGRAM': return 'Telegram';
+    case 'SALON': return 'Салон & Органика';
+    default: return chKey;
+  }
+};
 
 const txTypeFilter = ref('');
 
@@ -844,10 +939,17 @@ const loadAllData = async () => {
   }
 };
 
-watch(activeTab, async () => {
+watch(activeTab, async (newTab) => {
   await nextTick();
-  handleResize();
-  initCharts();
+  setTimeout(() => {
+    handleResize();
+    if (newTab === 'pnl') {
+      initPnlChart();
+      initExpenseChart();
+    } else if (newTab === 'channels') {
+      initChannelPieChart();
+    }
+  }, 60);
 });
 
 const loadCashTransactions = async () => {
@@ -1043,9 +1145,11 @@ const initChannelPieChart = () => {
   channelPieChartInstance.value = channelPieChartInstance.value || echarts.getInstanceByDom(channelPieChartRef.value) || echarts.init(channelPieChartRef.value);
 
   const data = channelAnalytics.value.map(c => ({
-    name: c.label,
+    name: formatChannelShort(c.channel),
     value: c.totalRevenue
   }));
+
+  const total = totalChannelsRevenue.value;
 
   const option: echarts.EChartsOption = {
     backgroundColor: 'transparent',
@@ -1053,86 +1157,64 @@ const initChannelPieChart = () => {
       trigger: 'item',
       backgroundColor: '#1A1A1E',
       borderColor: '#C5A059',
-      textStyle: { color: '#FFFFFF' },
-      formatter: '{b}: {c} ₽ ({d}%)'
+      borderWidth: 1,
+      textStyle: { color: '#FFFFFF', fontSize: 12 },
+      formatter: '{b}: <br/><b>{c} ₽</b> ({d}%)'
+    },
+    title: {
+      text: `${formatMoney(total)} ₽`,
+      subtext: 'Выручка каналов',
+      left: 'center',
+      top: '38%',
+      textStyle: {
+        color: '#FFFFFF',
+        fontSize: isMobile.value ? 16 : 18,
+        fontWeight: 'bold',
+        fontFamily: 'Outfit, sans-serif'
+      },
+      subtextStyle: {
+        color: '#A1A1AA',
+        fontSize: 11
+      }
     },
     legend: {
-      bottom: '0',
-      textStyle: { color: '#A1A1AA', fontSize: 10 }
+      show: false
     },
     series: [
       {
         name: 'Выручка по каналам',
         type: 'pie',
-        radius: ['40%', '65%'],
-        center: ['50%', '42%'],
+        radius: ['54%', '76%'],
+        center: ['50%', '50%'],
         data,
+        avoidLabelOverlap: false,
         label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 6,
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
         color: ['#E1306C', '#25D366', '#0088CC', '#C5A059']
       }
     ]
   };
 
   channelPieChartInstance.value.setOption(option);
+  channelPieChartInstance.value.resize();
 };
 
 const initChannelBarChart = () => {
-  if (!channelBarChartRef.value) return;
-  channelBarChartInstance.value = channelBarChartInstance.value || echarts.getInstanceByDom(channelBarChartRef.value) || echarts.init(channelBarChartRef.value);
-
-  const labels = channelAnalytics.value.map(c => c.label.split(' ')[0]);
-  const conversions = channelAnalytics.value.map(c => c.conversionToOrder);
-
-  const option: echarts.EChartsOption = {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: '#1A1A1E',
-      borderColor: '#C5A059',
-      textStyle: { color: '#FFFFFF' },
-      formatter: '{b}: {c}% конверсия в пошив'
-    },
-    grid: {
-      left: '12%',
-      right: '5%',
-      top: '15%',
-      bottom: '15%'
-    },
-    xAxis: {
-      type: 'category',
-      data: labels,
-      axisLine: { lineStyle: { color: 'rgba(197, 160, 89, 0.2)' } },
-      axisLabel: { color: '#A1A1AA', fontSize: 11 }
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: { color: '#A1A1AA', formatter: '{value}%' },
-      splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.05)' } }
-    },
-    series: [
-      {
-        name: 'Конверсия',
-        type: 'bar',
-        data: conversions,
-        itemStyle: {
-          color: (params: any) => {
-            const colors = ['#E1306C', '#25D366', '#0088CC', '#C5A059'];
-            return colors[params.dataIndex % colors.length];
-          },
-          borderRadius: [4, 4, 0, 0]
-        }
-      }
-    ]
-  };
-
-  channelBarChartInstance.value.setOption(option);
+  // Transformed to native luxury HTML conversion board for 100% responsiveness and high fidelity
 };
 
 const handleResize = () => {
   pnlChartInstance.value?.resize();
   expenseChartInstance.value?.resize();
   channelPieChartInstance.value?.resize();
-  channelBarChartInstance.value?.resize();
 };
 
 const formatMoney = (val: number) => {
@@ -1449,6 +1531,224 @@ const formatMoney = (val: number) => {
 .kn-echarts-box {
   width: 100%;
   height: 320px;
+}
+
+/* Channel Analytics Specific Charts & Breakdown */
+.kn-channel-analytics-grid {
+  margin-top: 16px;
+}
+
+.kn-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.kn-chart-total-pill, .kn-chart-badge {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(197, 160, 89, 0.12);
+  color: var(--kn-gold-primary);
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  white-space: nowrap;
+}
+
+.kn-donut-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kn-echarts-donut {
+  width: 100%;
+  height: 200px;
+}
+
+/* Channel Legend List */
+.kn-channel-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.kn-channel-legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(197, 160, 89, 0.3);
+  }
+}
+
+.kn-legend-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kn-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.instagram { background: #E1306C; box-shadow: 0 0 8px rgba(225, 48, 108, 0.6); }
+  &.whatsapp { background: #25D366; box-shadow: 0 0 8px rgba(37, 211, 102, 0.6); }
+  &.telegram { background: #0088CC; box-shadow: 0 0 8px rgba(0, 136, 204, 0.6); }
+  &.salon { background: var(--kn-gold-primary); box-shadow: 0 0 8px rgba(197, 160, 89, 0.6); }
+}
+
+.kn-legend-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #E4E4E7;
+}
+
+.kn-legend-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kn-legend-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.kn-legend-pct {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+
+  &.instagram { background: rgba(225, 48, 108, 0.15); color: #FF6584; }
+  &.whatsapp { background: rgba(37, 211, 102, 0.15); color: #25D366; }
+  &.telegram { background: rgba(0, 136, 204, 0.15); color: #38BDF8; }
+  &.salon { background: rgba(197, 160, 89, 0.15); color: var(--kn-gold-primary); }
+}
+
+/* Horizontal Conversion Board */
+.kn-channel-conversion-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.kn-conv-row-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(197, 160, 89, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.kn-conv-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kn-conv-channel-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kn-conv-icon-wrap {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.instagram { background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045); color: #fff; }
+  &.whatsapp { background: #25D366; color: #fff; }
+  &.telegram { background: #0088CC; color: #fff; }
+  &.salon { background: var(--kn-gold-primary); color: #0E0E10; }
+}
+
+.kn-conv-channel-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.kn-conv-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+
+  .kn-conv-rate {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--kn-gold-primary);
+  }
+
+  .kn-conv-label {
+    font-size: 10px;
+    color: var(--kn-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+}
+
+.kn-conv-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.kn-conv-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.instagram { background: linear-gradient(90deg, #E1306C, #FD1D1D); box-shadow: 0 0 8px rgba(225, 48, 108, 0.5); }
+  &.whatsapp { background: linear-gradient(90deg, #10B981, #25D366); box-shadow: 0 0 8px rgba(37, 211, 102, 0.5); }
+  &.telegram { background: linear-gradient(90deg, #0088CC, #38BDF8); box-shadow: 0 0 8px rgba(0, 136, 204, 0.5); }
+  &.salon { background: linear-gradient(90deg, #C5A059, #F59E0B); box-shadow: 0 0 8px rgba(197, 160, 89, 0.5); }
+}
+
+.kn-conv-row-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--kn-text-muted);
+  flex-wrap: wrap;
+  gap: 6px;
+
+  strong {
+    font-weight: 600;
+  }
 }
 
 /* Channel Cards */
