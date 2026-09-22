@@ -26,7 +26,10 @@
       </div>
       <div class="kn-card kn-inv-kpi alert">
         <span class="kn-kpi-lbl">Критические остатки:</span>
-        <strong class="kn-kpi-num font-outfit text-danger">{{ lowStockCount }} позиций ⚠️</strong>
+        <div class="kn-alert-val">
+          <strong class="kn-kpi-num font-outfit text-danger">{{ lowStockCount }} позиций</strong>
+          <AlertTriangle :size="16" :stroke-width="2" class="kn-warn-icon text-danger" />
+        </div>
       </div>
     </div>
 
@@ -40,41 +43,50 @@
             :class="{ active: activeType === 'ALL' }"
             @click="activeType = 'ALL'"
           >
-            Все позиции
+            <Boxes :size="15" :stroke-width="1.8" />
+            <span>Все позиции</span>
           </button>
           <button
             class="kn-type-tab"
             :class="{ active: activeType === 'SUIT' }"
             @click="activeType = 'SUIT'"
           >
-            👔 Классические Костюмы
+            <Briefcase :size="15" :stroke-width="1.8" />
+            <span>Классические Костюмы</span>
           </button>
           <button
             class="kn-type-tab"
             :class="{ active: activeType === 'FABRIC' }"
             @click="activeType = 'FABRIC'"
           >
-            🧵 Рулоны Тканей
+            <Layers :size="15" :stroke-width="1.8" />
+            <span>Рулоны Тканей</span>
           </button>
           <button
             class="kn-type-tab"
             :class="{ active: activeType === 'SHIRT' }"
             @click="activeType = 'SHIRT'"
           >
-            👔 Сорочки и Рубашки
+            <Shirt :size="15" :stroke-width="1.8" />
+            <span>Сорочки и Рубашки</span>
           </button>
           <button
             class="kn-type-tab"
             :class="{ active: activeType === 'ACCESSORY' }"
             @click="activeType = 'ACCESSORY'"
           >
-            🎩 Аксессуары
+            <Sparkles :size="15" :stroke-width="1.8" />
+            <span>Аксессуары</span>
           </button>
         </div>
 
         <!-- Search -->
         <div class="kn-search-wrap">
-          <el-input v-model="searchQuery" placeholder="Поиск по SKU, названию, цвету..." clearable />
+          <el-input v-model="searchQuery" placeholder="Поиск по SKU, названию, цвету..." clearable>
+            <template #prefix>
+              <Search :size="15" :stroke-width="1.8" class="kn-search-icon" />
+            </template>
+          </el-input>
         </div>
       </div>
     </div>
@@ -120,7 +132,8 @@
                 effect="dark"
                 class="kn-alert-tag"
               >
-                ⚠️ Заканчивается!
+                <AlertCircle :size="12" :stroke-width="2" />
+                <span>Заканчивается!</span>
               </el-tag>
             </div>
           </template>
@@ -137,7 +150,9 @@
             <div class="kn-counter-btns">
               <button class="kn-counter-btn" @click="changeStock(row.id, -1)">-</button>
               <button class="kn-counter-btn plus" @click="changeStock(row.id, 1)">+</button>
-              <button class="kn-del-btn" @click="deleteItem(row.id)" title="Удалить">🗑️</button>
+              <button class="kn-del-btn" @click="deleteItem(row.id)" title="Удалить">
+                <Trash2 :size="14" :stroke-width="1.8" />
+              </button>
             </div>
           </template>
         </el-table-column>
@@ -229,6 +244,17 @@
 import { ref, computed, onMounted } from 'vue';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  Boxes,
+  Briefcase,
+  Layers,
+  Shirt,
+  Sparkles,
+  Search,
+  AlertTriangle,
+  AlertCircle,
+  Trash2
+} from 'lucide-vue-next';
 
 const loading = ref(false);
 const inventory = ref<any[]>([]);
@@ -415,6 +441,9 @@ const formatMoney = (val: number) => {
 }
 
 .kn-type-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(197, 160, 89, 0.15);
   color: #C0C1CC;
@@ -441,6 +470,18 @@ const formatMoney = (val: number) => {
   width: 300px;
 }
 
+.kn-alert-val {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kn-alert-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* Table */
 .kn-table-card {
   padding: 20px;
@@ -448,8 +489,7 @@ const formatMoney = (val: number) => {
 
 .kn-sku-code {
   color: var(--kn-gold-light);
-  font-weight: 700;
-  font-size: 12px;
+  font-weight: 600;
 }
 
 .kn-prod-title {
@@ -464,9 +504,8 @@ const formatMoney = (val: number) => {
 
 .kn-size-pill {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  flex-direction: column;
+  color: #DFBE7A;
 }
 
 .kn-height-sub {
@@ -476,7 +515,7 @@ const formatMoney = (val: number) => {
 
 .kn-fabric-unit {
   font-size: 11px;
-  color: var(--kn-gold-light);
+  color: var(--kn-text-secondary);
 }
 
 .kn-stock-cell {
@@ -486,8 +525,7 @@ const formatMoney = (val: number) => {
 }
 
 .kn-stock-val {
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 600;
 
   &.low-stock {
     color: #F87171;

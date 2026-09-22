@@ -25,17 +25,19 @@
             clearable
             @input="handleSearch"
           >
-            <template #prefix>🔍</template>
+            <template #prefix>
+              <Search :size="15" :stroke-width="1.8" class="kn-search-icon" />
+            </template>
           </el-input>
         </div>
 
         <!-- Channel Filter -->
         <el-select v-model="filterChannel" placeholder="Канал заявки" clearable @change="handleFilter">
           <el-option label="Все каналы" value="" />
-          <el-option label="📷 Instagram @kingsname" value="INSTAGRAM" />
-          <el-option label="🌐 Сайт kingsname.store" value="WEBSITE" />
-          <el-option label="📍 Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
-          <el-option label="📞 Телефонный звонок" value="PHONE" />
+          <el-option label="Instagram (@kingsname)" value="INSTAGRAM" />
+          <el-option label="Сайт (kingsname.store)" value="WEBSITE" />
+          <el-option label="Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
+          <el-option label="Телефонный звонок" value="PHONE" />
         </el-select>
 
         <!-- Product Type Filter -->
@@ -86,7 +88,8 @@
               <strong class="kn-client-name">{{ row.clientName }}</strong>
               <span class="kn-client-tel">{{ row.clientPhone }}</span>
               <span v-if="row.clientInstagram" class="kn-client-insta">
-                📷 {{ row.clientInstagram }}
+                <Instagram :size="12" :stroke-width="1.8" />
+                <span>{{ row.clientInstagram }}</span>
               </span>
             </div>
           </template>
@@ -160,16 +163,16 @@
           <template #default="{ row }">
             <div class="kn-row-actions">
               <button class="kn-action-btn edit" title="Редактировать заказ" @click="openDrawerForEdit(row)">
-                ✏️
+                <Pencil :size="14" :stroke-width="1.8" />
               </button>
               <button class="kn-action-btn print" title="Распечатать лист мерок портного" @click="openPrintSheet(row)">
-                📄
+                <Printer :size="14" :stroke-width="1.8" />
               </button>
               <button class="kn-action-btn pay" title="Принять платеж" @click="openPaymentDialog(row)">
-                💳
+                <CreditCard :size="14" :stroke-width="1.8" />
               </button>
               <button class="kn-action-btn del" title="Удалить" @click="handleDelete(row.id)">
-                🗑️
+                <Trash2 :size="14" :stroke-width="1.8" />
               </button>
             </div>
           </template>
@@ -226,10 +229,10 @@
                   <el-col :span="12">
                     <el-form-item label="Канал привлечения">
                       <el-select v-model="form.channel" style="width: 100%">
-                        <el-option label="📷 Instagram Direct (@kingsname)" value="INSTAGRAM" />
-                        <el-option label="🌐 Официальный сайт (kingsname.store)" value="WEBSITE" />
-                        <el-option label="📍 Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
-                        <el-option label="📞 Телефон" value="PHONE" />
+                        <el-option label="Instagram Direct (@kingsname)" value="INSTAGRAM" />
+                        <el-option label="Официальный сайт (kingsname.store)" value="WEBSITE" />
+                        <el-option label="Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
+                        <el-option label="Телефон" value="PHONE" />
                       </el-select>
                     </el-form-item>
                   </el-col>
@@ -261,7 +264,9 @@
           <el-tab-pane label="2. Анатомические Мерки" name="measurements">
             <div class="kn-tab-content">
               <div class="kn-measurements-banner">
-                <span class="kn-measure-icon">📏</span>
+                <span class="kn-measure-icon">
+                  <Ruler :size="22" :stroke-width="1.8" />
+                </span>
                 <div>
                   <strong>Лист мерок мастера-портного</strong>
                   <p>Все параметры указываются в сантиметрах с точностью до 0.5 см</p>
@@ -619,6 +624,15 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  Search,
+  Instagram,
+  Pencil,
+  Printer,
+  CreditCard,
+  Trash2,
+  Ruler
+} from 'lucide-vue-next';
 
 const route = useRoute();
 
@@ -1055,12 +1069,24 @@ const formatChannel = (ch: string) => {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 13px;
+  color: var(--kn-gold-primary);
 
   &:hover {
     background: rgba(197, 160, 89, 0.2);
     border-color: var(--kn-gold-primary);
+    color: #FFFFFF;
     transform: scale(1.08);
+  }
+
+  &.del {
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.2);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #EF4444;
+      color: #FFFFFF;
+    }
   }
 }
 

@@ -24,7 +24,9 @@
             clearable
             @input="loadClients"
           >
-            <template #prefix>🔍</template>
+            <template #prefix>
+              <Search :size="15" :stroke-width="1.8" class="kn-search-icon" />
+            </template>
           </el-input>
         </div>
 
@@ -51,11 +53,16 @@
         <!-- Top Row -->
         <div class="kn-card-top">
           <div class="kn-vip-emblem" :class="'level-' + client.vipLevel">
-            {{ client.vipLevel === 3 ? '👑' : client.vipLevel === 2 ? '⭐' : '👔' }}
+            <Crown v-if="client.vipLevel === 3" :size="20" :stroke-width="2" />
+            <Sparkles v-else-if="client.vipLevel === 2" :size="20" :stroke-width="2" />
+            <UserCheck v-else :size="20" :stroke-width="2" />
           </div>
           <div class="kn-card-titles">
             <h3 class="kn-client-name">{{ client.name }}</h3>
-            <span class="kn-client-city font-outfit">📍 {{ client.city }}</span>
+            <span class="kn-client-city font-outfit">
+              <MapPin :size="12" :stroke-width="1.8" />
+              <span>{{ client.city }}</span>
+            </span>
           </div>
           <el-tag :type="getVipTagType(client.vipLevel)" effect="dark" class="kn-vip-tag">
             {{ getVipTitle(client.vipLevel) }}
@@ -76,7 +83,8 @@
               target="_blank"
               class="kn-insta-link font-outfit"
             >
-              📷 {{ client.instagram }}
+              <Instagram :size="13" :stroke-width="1.8" />
+              <span>{{ client.instagram }}</span>
             </a>
           </div>
 
@@ -93,11 +101,16 @@
         <!-- Footer Actions -->
         <div class="kn-card-footer">
           <button class="kn-action-btn-small" @click="createOrderForClient(client)">
-            ✂️ Оформить пошив
+            <Scissors :size="13" :stroke-width="1.8" />
+            <span>Оформить пошив</span>
           </button>
           <div class="kn-footer-icons">
-            <button class="kn-icon-btn" title="Редактировать" @click="openEditClient(client)">✏️</button>
-            <button class="kn-icon-btn del" title="Удалить" @click="deleteClient(client.id)">🗑️</button>
+            <button class="kn-icon-btn" title="Редактировать" @click="openEditClient(client)">
+              <Pencil :size="14" :stroke-width="1.8" />
+            </button>
+            <button class="kn-icon-btn del" title="Удалить" @click="deleteClient(client.id)">
+              <Trash2 :size="14" :stroke-width="1.8" />
+            </button>
           </div>
         </div>
       </div>
@@ -148,6 +161,17 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  Search,
+  Crown,
+  Sparkles,
+  UserCheck,
+  MapPin,
+  Instagram,
+  Scissors,
+  Pencil,
+  Trash2
+} from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -352,6 +376,9 @@ const createOrderForClient = (client: any) => {
 }
 
 .kn-client-city {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
   color: var(--kn-text-muted);
 }
@@ -384,6 +411,9 @@ const createOrderForClient = (client: any) => {
 }
 
 .kn-insta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: #FF7096;
   text-decoration: none;
   font-weight: 600;
@@ -416,6 +446,9 @@ const createOrderForClient = (client: any) => {
 }
 
 .kn-action-btn-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: rgba(197, 160, 89, 0.1);
   border: 1px solid var(--kn-gold-border);
   color: var(--kn-gold-light);
@@ -447,15 +480,24 @@ const createOrderForClient = (client: any) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  color: var(--kn-gold-primary);
   transition: all 0.2s;
 
   &:hover {
+    background: rgba(197, 160, 89, 0.2);
     border-color: var(--kn-gold-primary);
+    color: #FFFFFF;
   }
 
-  &.del:hover {
-    border-color: #EF4444;
+  &.del {
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.2);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #EF4444;
+      color: #FFFFFF;
+    }
   }
 }
 </style>

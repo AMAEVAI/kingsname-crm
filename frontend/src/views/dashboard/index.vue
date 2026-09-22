@@ -12,15 +12,15 @@
       <!-- Quick Action Buttons -->
       <div class="kn-dash-actions">
         <button class="kn-btn-action insta" @click="openQuickLeadModal">
-          <span class="kn-btn-icon">📷</span>
+          <Instagram :size="16" :stroke-width="1.8" class="kn-btn-icon" />
           <span>+ Лид из @kingsname</span>
         </button>
         <button class="kn-btn-action appoint" @click="openAppointmentModal">
-          <span class="kn-btn-icon">📅</span>
+          <CalendarPlus :size="16" :stroke-width="1.8" class="kn-btn-icon" />
           <span>+ Запись на примерку</span>
         </button>
         <button class="kn-btn-action bespoke" @click="router.push('/orders')">
-          <span class="kn-btn-icon">✂️</span>
+          <Scissors :size="16" :stroke-width="1.8" class="kn-btn-icon" />
           <span>Оформить пошив</span>
         </button>
       </div>
@@ -46,7 +46,9 @@
       <div class="kn-card kn-kpi-card">
         <div class="kn-kpi-header">
           <span class="kn-kpi-title">Выручка за сегодня</span>
-          <span class="kn-kpi-icon">💵</span>
+          <span class="kn-kpi-icon">
+            <Banknote :size="18" :stroke-width="1.8" />
+          </span>
         </div>
         <div class="kn-kpi-value font-outfit">
           {{ formatMoney(analytics.todayRevenue || 185000) }} ₽
@@ -60,7 +62,9 @@
       <div class="kn-card kn-kpi-card">
         <div class="kn-kpi-header">
           <span class="kn-kpi-title">Средний чек изделия</span>
-          <span class="kn-kpi-icon">👑</span>
+          <span class="kn-kpi-icon">
+            <Crown :size="18" :stroke-width="1.8" />
+          </span>
         </div>
         <div class="kn-kpi-value font-outfit">
           {{ formatMoney(analytics.averageCheck || 165000) }} ₽
@@ -109,7 +113,8 @@
           </p>
         </div>
         <button class="kn-view-all-orders-btn" @click="router.push('/orders')">
-          Все заказы в таблице →
+          <span>Все заказы в таблице</span>
+          <ArrowRight :size="14" :stroke-width="2" />
         </button>
       </div>
 
@@ -124,7 +129,9 @@
         >
           <div class="kn-funnel-top">
             <span class="kn-step-num">0{{ idx + 1 }}</span>
-            <span class="kn-stage-icon">{{ stage.icon }}</span>
+            <span class="kn-stage-icon">
+              <component :is="stage.icon" :size="20" :stroke-width="1.8" />
+            </span>
           </div>
 
           <h3 class="kn-stage-name">{{ stage.label }}</h3>
@@ -285,11 +292,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
 import { ElMessage } from 'element-plus';
 import * as echarts from 'echarts';
+import {
+  Instagram,
+  CalendarPlus,
+  Scissors,
+  Banknote,
+  Crown,
+  Inbox,
+  CalendarClock,
+  Ruler,
+  CreditCard,
+  Shirt,
+  CheckCircle2,
+  ArrowRight
+} from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -320,12 +341,12 @@ const appointForm = ref({
 
 // 6-Stage Bespoke Sales Funnel Definition
 const funnelStages = [
-  { key: 'LEAD', label: '1. Новая заявка', icon: '📥', description: 'Лид из Instagram @kingsname или сайта' },
-  { key: 'APPOINTMENT', label: '2. Запись на примерку', icon: '📅', description: 'Дата визита в салон KINGSNAME' },
-  { key: 'FITTING', label: '3. Примерка / Мерки', icon: '📏', description: 'Снятие анатомических параметров' },
-  { key: 'PAYMENT_AGREED', label: '4. Согласование ткани', icon: '💳', description: 'Выбор шерсти и предоплата 50%' },
-  { key: 'TAILORING', label: '5. Пошив в ателье', icon: '🧵', description: 'Ручная сборка портным Адамом' },
-  { key: 'DELIVERED', label: '6. Выдача клиенту', icon: '👑', description: 'Готов, выдан в чехле, закрыт' },
+  { key: 'LEAD', label: '1. Новая заявка', icon: Inbox, description: 'Лид из Instagram @kingsname или сайта' },
+  { key: 'APPOINTMENT', label: '2. Запись на примерку', icon: CalendarClock, description: 'Дата визита в салон KINGSNAME' },
+  { key: 'FITTING', label: '3. Примерка / Мерки', icon: Ruler, description: 'Снятие анатомических параметров' },
+  { key: 'PAYMENT_AGREED', label: '4. Согласование ткани', icon: CreditCard, description: 'Выбор шерсти и предоплата 50%' },
+  { key: 'TAILORING', label: '5. Пошив в ателье', icon: Shirt, description: 'Ручная сборка портным Адамом' },
+  { key: 'DELIVERED', label: '6. Выдача клиенту', icon: CheckCircle2, description: 'Готов, выдан в чехле, закрыт' },
 ];
 
 onMounted(async () => {
@@ -765,7 +786,24 @@ const initCharts = () => {
 }
 
 .kn-stage-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kn-gold-primary);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.kn-funnel-card:hover .kn-stage-icon,
+.kn-funnel-card.active .kn-stage-icon {
+  transform: scale(1.15);
+  color: #DFBE7A;
+}
+
+.kn-kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kn-gold-primary);
 }
 
 .kn-stage-name {

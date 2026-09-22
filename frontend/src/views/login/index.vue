@@ -22,14 +22,16 @@
         <h1 class="kn-brand-heading font-brand">KINGSNAME</h1>
         <p class="kn-brand-caption font-outfit">HAUTE SARTORIAL & BESPOKE TAILORING</p>
         <div class="kn-badge-gateway">
-          <span class="kn-shield-icon">🛡️</span>
+          <ShieldCheck :size="15" :stroke-width="1.8" class="kn-shield-icon" />
           <span>Защищенный цифровой терминал доступа</span>
         </div>
       </div>
 
       <!-- Lockout Overlay (Triggered after 3 failed attempts) -->
       <div v-if="isLocked" class="kn-lockout-container">
-        <div class="kn-lockout-icon">🔒</div>
+        <div class="kn-lockout-icon">
+          <Lock :size="44" :stroke-width="1.6" />
+        </div>
         <h3 class="kn-lockout-title">Терминал временно заблокирован</h3>
         <p class="kn-lockout-desc">
           Превышено допустимое число неудачных попыток ввода кода (3/3).
@@ -69,7 +71,7 @@
         <!-- Security Error Message -->
         <transition name="el-fade-in">
           <div v-if="errorMessage" class="kn-security-error">
-            <span class="kn-err-icon">⚠️</span>
+            <AlertTriangle :size="15" :stroke-width="1.8" class="kn-err-icon" />
             <span>{{ errorMessage }}</span>
           </div>
         </transition>
@@ -81,7 +83,10 @@
           @click="submitLogin"
         >
           <span v-if="isSubmitting" class="kn-spinner"></span>
-          <span v-else>Войти в CRM KINGSNAME →</span>
+          <span v-else class="kn-btn-inner">
+            <span>Войти в CRM KINGSNAME</span>
+            <ArrowRight :size="16" :stroke-width="2" class="kn-btn-arrow" />
+          </span>
         </button>
 
         <!-- Virtual Numeric Keypad -->
@@ -91,7 +96,9 @@
           </button>
           <button class="kn-key clear" @click="clearAll" title="Очистить">C</button>
           <button class="kn-key" @click="pressKey('0')">0</button>
-          <button class="kn-key backspace" @click="backspace" title="Удалить">⌫</button>
+          <button class="kn-key backspace" @click="backspace" title="Удалить">
+            <Delete :size="18" :stroke-width="1.8" />
+          </button>
         </div>
 
         <!-- Quick Demo Presets -->
@@ -99,13 +106,16 @@
           <span class="kn-presets-label">Быстрый доступ (демо-коды):</span>
           <div class="kn-preset-tags">
             <button class="kn-preset-pill master" @click="fillPreset('88888888')">
-              👑 88888888 (Шеф-Администратор)
+              <Crown :size="13" :stroke-width="2" class="kn-preset-icon" />
+              <span>88888888 (Шеф-Администратор)</span>
             </button>
             <button class="kn-preset-pill" @click="fillPreset('12345678')">
-              👔 12345678 (Консультант)
+              <UserCheck :size="13" :stroke-width="2" class="kn-preset-icon" />
+              <span>12345678 (Консультант)</span>
             </button>
             <button class="kn-preset-pill" @click="fillPreset('55555555')">
-              ✂️ 55555555 (Мастер-портной)
+              <Scissors :size="13" :stroke-width="2" class="kn-preset-icon" />
+              <span>55555555 (Мастер-портной)</span>
             </button>
           </div>
         </div>
@@ -124,6 +134,16 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/user';
 import { ElMessage } from 'element-plus';
+import {
+  ShieldCheck,
+  Lock,
+  AlertTriangle,
+  Delete,
+  Crown,
+  UserCheck,
+  Scissors,
+  ArrowRight
+} from 'lucide-vue-next';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -376,6 +396,7 @@ const formatTimer = (totalSeconds: number) => {
 .kn-badge-gateway {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: rgba(197, 160, 89, 0.08);
   border: 1px solid rgba(197, 160, 89, 0.2);
@@ -384,6 +405,11 @@ const formatTimer = (totalSeconds: number) => {
   font-size: 12px;
   color: #DFBE7A;
   margin-bottom: 28px;
+}
+
+.kn-shield-icon {
+  display: inline-flex;
+  color: var(--kn-gold-primary);
 }
 
 .kn-pin-instructions {
@@ -560,7 +586,10 @@ const formatTimer = (totalSeconds: number) => {
 }
 
 .kn-lockout-icon {
-  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EF4444;
   margin-bottom: 16px;
 }
 

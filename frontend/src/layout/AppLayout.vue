@@ -25,27 +25,27 @@
       <!-- Navigation Menu -->
       <nav class="kn-nav">
         <router-link to="/dashboard" class="kn-nav-item" active-class="active">
-          <span class="kn-nav-icon">📊</span>
+          <LayoutDashboard :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Аналитика и Дашборд</span>
         </router-link>
 
         <router-link to="/orders" class="kn-nav-item" active-class="active">
-          <span class="kn-nav-icon">✂️</span>
+          <Scissors :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Заказы и Пошив</span>
         </router-link>
 
         <router-link to="/clients" class="kn-nav-item" active-class="active">
-          <span class="kn-nav-icon">👑</span>
+          <Users :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">База VIP-Клиентов</span>
         </router-link>
 
         <router-link to="/inventory" class="kn-nav-item" active-class="active">
-          <span class="kn-nav-icon">📦</span>
+          <Package :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Склад и Ткани</span>
         </router-link>
 
         <router-link to="/security" class="kn-nav-item" active-class="active">
-          <span class="kn-nav-icon">🔐</span>
+          <ShieldCheck :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">8-Значные Коды Доступа</span>
           <span v-if="userStore.isAdmin" class="kn-admin-pill">Admin</span>
         </router-link>
@@ -59,11 +59,11 @@
             <span class="kn-channel-label">Каналы продаж:</span>
           </div>
           <a href="https://www.instagram.com/kingsname" target="_blank" class="kn-social-link">
-            <span class="kn-social-icon">📷</span>
+            <Instagram :size="16" :stroke-width="1.8" class="kn-social-icon" />
             <span class="kn-social-text">Instagram: <strong>@kingsname</strong></span>
           </a>
           <a href="https://kingsname.store/" target="_blank" class="kn-social-link">
-            <span class="kn-social-icon">🌐</span>
+            <Globe :size="16" :stroke-width="1.8" class="kn-social-icon" />
             <span class="kn-social-text">Сайт: <strong>kingsname.store</strong></span>
           </a>
         </div>
@@ -76,7 +76,7 @@
       <header class="kn-topbar">
         <div class="kn-topbar-left">
           <div class="kn-location-badge">
-            <span class="kn-loc-icon">📍</span>
+            <MapPin :size="15" :stroke-width="1.8" class="kn-loc-icon" />
             <span>Грозный, Чеченская Республика • Премиальный Салон KINGSNAME</span>
           </div>
         </div>
@@ -95,8 +95,8 @@
 
           <!-- Logout Button -->
           <button class="kn-logout-btn" @click="handleLogout" title="Выйти из системы">
+            <LogOut :size="15" :stroke-width="1.8" class="kn-logout-icon" />
             <span>Выход</span>
-            <span class="kn-logout-icon">⏻</span>
           </button>
         </div>
       </header>
@@ -116,6 +116,17 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user';
 import { ElMessageBox } from 'element-plus';
+import {
+  LayoutDashboard,
+  Scissors,
+  Users,
+  Package,
+  ShieldCheck,
+  Instagram,
+  Globe,
+  MapPin,
+  LogOut
+} from 'lucide-vue-next';
 
 const userStore = useUserStore();
 
@@ -230,7 +241,17 @@ const handleLogout = () => {
 }
 
 .kn-nav-icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.kn-nav-item:hover .kn-nav-icon,
+.kn-nav-item.active .kn-nav-icon {
+  transform: scale(1.1);
+  color: #DFBE7A;
 }
 
 .kn-admin-pill {

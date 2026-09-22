@@ -17,7 +17,9 @@
     <!-- Security Status Banners -->
     <div class="kn-security-grid">
       <div class="kn-card kn-sec-status-card">
-        <div class="kn-sec-icon">🛡️</div>
+        <div class="kn-sec-icon">
+          <ShieldCheck :size="26" :stroke-width="1.8" />
+        </div>
         <div>
           <h3 class="kn-sec-card-title">Контур защиты от перебора (Brute-Force)</h3>
           <p class="kn-sec-card-desc">
@@ -28,7 +30,9 @@
       </div>
 
       <div class="kn-card kn-sec-status-card">
-        <div class="kn-sec-icon master">👑</div>
+        <div class="kn-sec-icon master">
+          <Crown :size="26" :stroke-width="1.8" />
+        </div>
         <div>
           <h3 class="kn-sec-card-title">Мастер-код Администратора</h3>
           <p class="kn-sec-card-desc">
@@ -46,7 +50,10 @@
           <h2 class="kn-section-title font-brand">Выданные 8-Значные Коды Доступа</h2>
           <p class="kn-section-sub">Управление правами сотрудников и ролями в CRM</p>
         </div>
-        <button class="kn-refresh-btn" @click="loadData">Обновить 🔄</button>
+        <button class="kn-refresh-btn" @click="loadData">
+          <RefreshCw :size="13" :stroke-width="1.8" />
+          <span>Обновить</span>
+        </button>
       </div>
 
       <el-table :data="codes" style="width: 100%" v-loading="loading">
@@ -56,7 +63,7 @@
             <div class="kn-code-cell font-outfit">
               <span class="kn-code-badge">{{ formatCode(row.code) }}</span>
               <button class="kn-code-copy-btn" title="Скопировать код" @click="copyCode(row.code)">
-                📋
+                <Copy :size="13" :stroke-width="1.8" />
               </button>
             </div>
           </template>
@@ -114,7 +121,10 @@
             >
               Отозвать
             </el-button>
-            <span v-else-if="row.code === '88888888'" class="kn-master-lock">🔒 Мастер</span>
+            <span v-else-if="row.code === '88888888'" class="kn-master-lock">
+              <Lock :size="12" :stroke-width="1.8" />
+              <span>Мастер</span>
+            </span>
             <span v-else class="kn-revoked-text">Деактивирован</span>
           </template>
         </el-table-column>
@@ -159,10 +169,10 @@
 
         <el-form-item label="Роль и уровень доступа">
           <el-select v-model="codeForm.roleCode" style="width: 100%">
-            <el-option label="👑 Шеф-Администратор (Полный доступ)" value="admin" />
-            <el-option label="👔 Консультант салона (Заявки, клиенты, оплата)" value="consultant" />
-            <el-option label="✂️ Мастер-портной (Мерки, пошив, готовность)" value="tailor" />
-            <el-option label="📷 Менеджер сайта и Instagram Direct" value="manager" />
+            <el-option label="Шеф-Администратор (Полный доступ)" value="admin" />
+            <el-option label="Консультант салона (Заявки, клиенты, оплата)" value="consultant" />
+            <el-option label="Мастер-портной (Мерки, пошив, готовность)" value="tailor" />
+            <el-option label="Менеджер сайта и Instagram Direct" value="manager" />
           </el-select>
         </el-form-item>
 
@@ -189,6 +199,13 @@
 import { ref, onMounted } from 'vue';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import {
+  ShieldCheck,
+  Crown,
+  RefreshCw,
+  Copy,
+  Lock
+} from 'lucide-vue-next';
 
 const loading = ref(false);
 const codes = ref<any[]>([]);
@@ -438,11 +455,14 @@ const revokeCode = (id: number) => {
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: all 0.2s;
 
   &:hover {
     border-color: var(--kn-gold-primary);
-    color: #FFFFFF;
+    color: var(--kn-gold-light);
   }
 }
 
@@ -464,16 +484,32 @@ const revokeCode = (id: number) => {
 }
 
 .kn-code-copy-btn {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(197, 160, 89, 0.15);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
   cursor: pointer;
-  font-size: 14px;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kn-gold-primary);
+  transition: all 0.2s;
 
   &:hover {
-    opacity: 1;
+    background: rgba(197, 160, 89, 0.18);
+    border-color: var(--kn-gold-primary);
+    color: #FFFFFF;
   }
+}
+
+.kn-master-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--kn-gold-primary);
+  font-weight: 600;
+  font-size: 12px;
 }
 
 .kn-emp-cell {
