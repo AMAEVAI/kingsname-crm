@@ -95,6 +95,80 @@ export interface MockLoginLog {
   loginTime: string;
 }
 
+export interface MockCashAccount {
+  id: number;
+  name: string;
+  accountType: 'CASH' | 'POS' | 'BANK';
+  balance: number;
+  currency: string;
+  accountNo?: string;
+  updateTime: string;
+}
+
+export interface MockCashTransaction {
+  id: number;
+  transactionNo: string;
+  accountId: number;
+  accountName: string;
+  type: 'INCOME' | 'EXPENSE';
+  category: string;
+  amount: number;
+  relatedOrderNo?: string;
+  operatorName: string;
+  comment: string;
+  createTime: string;
+}
+
+export interface MockPurchase {
+  id: number;
+  invoiceNo: string;
+  supplier: string;
+  materialType: 'FABRIC' | 'LINING' | 'BUTTONS' | 'ACCESSORY';
+  materialName: string;
+  quantity: number;
+  unit: string;
+  pricePerUnit: number;
+  totalCost: number;
+  paymentStatus: 'PAID' | 'PARTIAL' | 'UNPAID';
+  accountId: number;
+  paidAmount: number;
+  arrivalDate: string;
+  createTime: string;
+}
+
+export interface MockChannelAnalytics {
+  channel: string;
+  label: string;
+  leadsCount: number;
+  appointmentsCount: number;
+  ordersCount: number;
+  totalRevenue: number;
+  avgCheck: number;
+  conversionToAppointment: number;
+  conversionToOrder: number;
+  adSpend: number;
+  netMargin: number;
+  netProfit: number;
+  icon: string;
+}
+
+export interface MockOrderEconomics {
+  id: number;
+  orderNo: string;
+  clientName: string;
+  channel: string;
+  productType: string;
+  fabricBrand: string;
+  salePrice: number;
+  fabricCost: number;
+  materialsCost: number;
+  tailorWorkCost: number;
+  totalCogs: number;
+  grossProfit: number;
+  marginPercent: number;
+  status: string;
+}
+
 class MockDatabase {
   private codes: MockAccessCode[] = [
     {
@@ -435,6 +509,346 @@ class MockDatabase {
     }
   ];
 
+  private cashAccounts: MockCashAccount[] = [
+    {
+      id: 1,
+      name: 'Сейф салона (Наличные)',
+      accountType: 'CASH',
+      balance: 1420000,
+      currency: 'RUB',
+      accountNo: 'SAFE-GROZNY-01',
+      updateTime: '2026-09-22 16:30'
+    },
+    {
+      id: 2,
+      name: 'POS-терминал / СБП (Эквайринг)',
+      accountType: 'POS',
+      balance: 1980000,
+      currency: 'RUB',
+      accountNo: 'POS-KNG-9801',
+      updateTime: '2026-09-22 17:00'
+    },
+    {
+      id: 3,
+      name: 'Расчетный счет KINGSNAME (Банк)',
+      accountType: 'BANK',
+      balance: 1450000,
+      currency: 'RUB',
+      accountNo: '40702810900000088888',
+      updateTime: '2026-09-22 15:45'
+    }
+  ];
+
+  private cashTransactions: MockCashTransaction[] = [
+    {
+      id: 1,
+      transactionNo: 'TX-2026-001',
+      accountId: 2,
+      accountName: 'POS-терминал / СБП (Эквайринг)',
+      type: 'INCOME',
+      category: 'Предоплата 50%',
+      amount: 120000,
+      relatedOrderNo: 'KNG-2026-001',
+      operatorName: 'Шеф-Администратор',
+      comment: 'Предоплата за пошив костюма Loro Piana (Асланбек Кадыров)',
+      createTime: '2026-09-22 14:20'
+    },
+    {
+      id: 2,
+      transactionNo: 'TX-2026-002',
+      accountId: 1,
+      accountName: 'Сейф салона (Наличные)',
+      type: 'INCOME',
+      category: '100% Оплата',
+      amount: 280000,
+      relatedOrderNo: 'KNG-2026-002',
+      operatorName: 'Менеджер Direct/Сайт',
+      comment: 'Полный расчет за смокинг Black Tie Scabal (Умар Джабраилов)',
+      createTime: '2026-09-22 13:45'
+    },
+    {
+      id: 3,
+      transactionNo: 'TX-2026-003',
+      accountId: 3,
+      accountName: 'Расчетный счет KINGSNAME (Банк)',
+      type: 'EXPENSE',
+      category: 'Закупка ткани',
+      amount: 385000,
+      relatedOrderNo: 'INV-LP-88',
+      operatorName: 'Шеф-Администратор',
+      comment: 'Оплата инвойса Loro Piana S.p.A. (25м Super 150s Tasmanian)',
+      createTime: '2026-09-21 16:30'
+    },
+    {
+      id: 4,
+      transactionNo: 'TX-2026-004',
+      accountId: 1,
+      accountName: 'Сейф салона (Наличные)',
+      type: 'EXPENSE',
+      category: 'Оплата портному',
+      amount: 60000,
+      relatedOrderNo: 'KNG-2026-001',
+      operatorName: 'Шеф-Администратор',
+      comment: 'Аванс мастеру-портному Адаму за раскрой и сборку 2 костюмов',
+      createTime: '2026-09-21 12:00'
+    },
+    {
+      id: 5,
+      transactionNo: 'TX-2026-005',
+      accountId: 2,
+      accountName: 'POS-терминал / СБП (Эквайринг)',
+      type: 'INCOME',
+      category: 'Предоплата 50%',
+      amount: 95000,
+      relatedOrderNo: 'KNG-2026-003',
+      operatorName: 'Менеджер Direct/Сайт',
+      comment: 'Предоплата за пальто из кашемира (Зелимхан Бакаев)',
+      createTime: '2026-09-20 18:10'
+    },
+    {
+      id: 6,
+      transactionNo: 'TX-2026-006',
+      accountId: 3,
+      accountName: 'Расчетный счет KINGSNAME (Банк)',
+      type: 'EXPENSE',
+      category: 'Фурнитура и приклад',
+      amount: 85000,
+      relatedOrderNo: 'INV-ACC-01',
+      operatorName: 'Шеф-Администратор',
+      comment: 'Пуговицы из натурального рога буйвола + бортовка Lampo (Италия)',
+      createTime: '2026-09-19 11:30'
+    }
+  ];
+
+  private purchases: MockPurchase[] = [
+    {
+      id: 1,
+      invoiceNo: 'LP-2026-88',
+      supplier: 'Loro Piana S.p.A. (Италия)',
+      materialType: 'FABRIC',
+      materialName: 'Шерсть Super 150s Tasmanian Navy Twill',
+      quantity: 25,
+      unit: 'м',
+      pricePerUnit: 15400,
+      totalCost: 385000,
+      paymentStatus: 'PAID',
+      accountId: 3,
+      paidAmount: 385000,
+      arrivalDate: '2026-09-18',
+      createTime: '2026-09-15'
+    },
+    {
+      id: 2,
+      invoiceNo: 'VBC-2026-04',
+      supplier: 'Vitale Barberis Canonico (Италия)',
+      materialType: 'FABRIC',
+      materialName: 'Шерсть Super 130s Perennial Charcoal',
+      quantity: 30,
+      unit: 'м',
+      pricePerUnit: 9200,
+      totalCost: 276000,
+      paymentStatus: 'PAID',
+      accountId: 3,
+      paidAmount: 276000,
+      arrivalDate: '2026-09-20',
+      createTime: '2026-09-16'
+    },
+    {
+      id: 3,
+      invoiceNo: 'SC-2026-12',
+      supplier: 'Scabal (Англия/Бельгия)',
+      materialType: 'FABRIC',
+      materialName: 'Diamond Chip Super 180s Midnight Blue',
+      quantity: 15,
+      unit: 'м',
+      pricePerUnit: 28000,
+      totalCost: 420000,
+      paymentStatus: 'PARTIAL',
+      accountId: 3,
+      paidAmount: 210000,
+      arrivalDate: '2026-09-25',
+      createTime: '2026-09-19'
+    },
+    {
+      id: 4,
+      invoiceNo: 'LP-2026-92',
+      supplier: 'Loro Piana S.p.A. (Италия)',
+      materialType: 'FABRIC',
+      materialName: '100% Кашемир Black Tie 450g',
+      quantity: 12,
+      unit: 'м',
+      pricePerUnit: 32000,
+      totalCost: 384000,
+      paymentStatus: 'UNPAID',
+      accountId: 3,
+      paidAmount: 0,
+      arrivalDate: '2026-10-02',
+      createTime: '2026-09-22'
+    },
+    {
+      id: 5,
+      invoiceNo: 'ACC-2026-01',
+      supplier: 'Lampo & Cobrax (Италия)',
+      materialType: 'BUTTONS',
+      materialName: 'Пуговицы из рога буйвола (200 шт) + шелковая подкладка Cupro',
+      quantity: 1,
+      unit: 'компл',
+      pricePerUnit: 85000,
+      totalCost: 85000,
+      paymentStatus: 'PAID',
+      accountId: 3,
+      paidAmount: 85000,
+      arrivalDate: '2026-09-19',
+      createTime: '2026-09-14'
+    }
+  ];
+
+  private channelAnalytics: MockChannelAnalytics[] = [
+    {
+      channel: 'INSTAGRAM',
+      label: 'Instagram @kingsname',
+      leadsCount: 48,
+      appointmentsCount: 29,
+      ordersCount: 19,
+      totalRevenue: 3450000,
+      avgCheck: 181578,
+      conversionToAppointment: 60.4,
+      conversionToOrder: 39.5,
+      adSpend: 180000,
+      netMargin: 58.2,
+      netProfit: 2007900,
+      icon: 'Instagram'
+    },
+    {
+      channel: 'WHATSAPP',
+      label: 'WhatsApp Салон (+7 928...)',
+      leadsCount: 34,
+      appointmentsCount: 24,
+      ordersCount: 16,
+      totalRevenue: 2890000,
+      avgCheck: 180625,
+      conversionToAppointment: 70.5,
+      conversionToOrder: 47.0,
+      adSpend: 60000,
+      netMargin: 61.4,
+      netProfit: 1774460,
+      icon: 'MessageSquare'
+    },
+    {
+      channel: 'TELEGRAM',
+      label: 'Telegram Канал & Чат',
+      leadsCount: 22,
+      appointmentsCount: 12,
+      ordersCount: 8,
+      totalRevenue: 1380000,
+      avgCheck: 172500,
+      conversionToAppointment: 54.5,
+      conversionToOrder: 36.3,
+      adSpend: 45000,
+      netMargin: 59.0,
+      netProfit: 814200,
+      icon: 'Send'
+    },
+    {
+      channel: 'SALON',
+      label: 'Прямой визит в салон / Рекомендации',
+      leadsCount: 18,
+      appointmentsCount: 17,
+      ordersCount: 15,
+      totalRevenue: 3150000,
+      avgCheck: 210000,
+      conversionToAppointment: 94.4,
+      conversionToOrder: 83.3,
+      adSpend: 0,
+      netMargin: 64.5,
+      netProfit: 2031750,
+      icon: 'Crown'
+    }
+  ];
+
+  private orderEconomics: MockOrderEconomics[] = [
+    {
+      id: 1,
+      orderNo: 'KNG-2026-001',
+      clientName: 'Асланбек Кадыров',
+      channel: 'INSTAGRAM',
+      productType: 'Костюм-тройка Bespoke',
+      fabricBrand: 'Loro Piana Tasmanian 150s',
+      salePrice: 240000,
+      fabricCost: 46200,
+      materialsCost: 8500,
+      tailorWorkCost: 32000,
+      totalCogs: 86700,
+      grossProfit: 153300,
+      marginPercent: 63.8,
+      status: 'В пошиве'
+    },
+    {
+      id: 2,
+      orderNo: 'KNG-2026-002',
+      clientName: 'Умар Джабраилов',
+      channel: 'SALON',
+      productType: 'Смокинг Black Tie',
+      fabricBrand: 'Scabal Diamond Chip 180s',
+      salePrice: 280000,
+      fabricCost: 78000,
+      materialsCost: 12000,
+      tailorWorkCost: 35000,
+      totalCogs: 125000,
+      grossProfit: 155000,
+      marginPercent: 55.3,
+      status: 'Готов / Закрыт'
+    },
+    {
+      id: 3,
+      orderNo: 'KNG-2026-003',
+      clientName: 'Турпал-Али Хакимов',
+      channel: 'WHATSAPP',
+      productType: 'Костюм-двойка Business',
+      fabricBrand: 'VBC Perennial 130s',
+      salePrice: 185000,
+      fabricCost: 32200,
+      materialsCost: 6500,
+      tailorWorkCost: 26000,
+      totalCogs: 64700,
+      grossProfit: 120300,
+      marginPercent: 65.0,
+      status: 'Примерка'
+    },
+    {
+      id: 4,
+      orderNo: 'KNG-2026-004',
+      clientName: 'Зелимхан Бакаев',
+      channel: 'TELEGRAM',
+      productType: 'Пальто из кашемира',
+      fabricBrand: 'Loro Piana 100% Cashmere',
+      salePrice: 310000,
+      fabricCost: 96000,
+      materialsCost: 9500,
+      tailorWorkCost: 38000,
+      totalCogs: 143500,
+      grossProfit: 166500,
+      marginPercent: 53.7,
+      status: 'Согласован'
+    },
+    {
+      id: 5,
+      orderNo: 'KNG-2026-005',
+      clientName: 'Рамзан Магомадов',
+      channel: 'INSTAGRAM',
+      productType: 'Сорочки ручной работы (x3)',
+      fabricBrand: 'Thomas Mason Giza Cotton',
+      salePrice: 105000,
+      fabricCost: 21000,
+      materialsCost: 4200,
+      tailorWorkCost: 15000,
+      totalCogs: 40200,
+      grossProfit: 64800,
+      marginPercent: 61.7,
+      status: 'В пошиве'
+    }
+  ];
+
   // Rate Limiting simulation
   private failedAttempts = 0;
   private lockedUntil: number | null = null;
@@ -769,6 +1183,171 @@ class MockDatabase {
         categories,
         channels
       },
+      msg: 'OK'
+    };
+  }
+
+  // --- Finance & Accounting Handlers ---
+  public getFinanceOverview() {
+    const totalLiquid = this.cashAccounts.reduce((acc, a) => acc + a.balance, 0);
+    const totalRevenue = 10870000;
+    const totalCogs = 3840000;
+    const totalOpex = 2150000;
+    const netProfit = totalRevenue - totalCogs - totalOpex;
+    const netMarginPercent = Math.round((netProfit / totalRevenue) * 1000) / 10;
+
+    return {
+      code: 0,
+      data: {
+        totalLiquid,
+        totalRevenue,
+        totalCogs,
+        totalOpex,
+        netProfit,
+        netMarginPercent,
+        pnlTrend: {
+          months: ['Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен'],
+          revenue: [1200000, 1450000, 1680000, 1920000, 2150000, 2470000],
+          cogs: [450000, 520000, 610000, 680000, 740000, 840000],
+          netProfit: [520000, 660000, 770000, 890000, 980000, 1150000]
+        },
+        expenseStructure: [
+          { name: 'Ткани и материалы (Loro Piana, VBC, Scabal)', value: 52 },
+          { name: 'Работа мастеров-портных', value: 26 },
+          { name: 'Аренда флагманского салона', value: 12 },
+          { name: 'Фирменная упаковка и кофры', value: 5 },
+          { name: 'Маркетинг и реклама', value: 5 }
+        ]
+      },
+      msg: 'OK'
+    };
+  }
+
+  public getChannelAnalytics() {
+    return {
+      code: 0,
+      data: [...this.channelAnalytics],
+      msg: 'OK'
+    };
+  }
+
+  public getCashAccounts() {
+    return {
+      code: 0,
+      data: [...this.cashAccounts],
+      msg: 'OK'
+    };
+  }
+
+  public getCashTransactions(params?: { type?: string; accountId?: number }) {
+    let list = [...this.cashTransactions];
+    if (params?.type) {
+      list = list.filter(t => t.type === params.type);
+    }
+    if (params?.accountId) {
+      list = list.filter(t => t.accountId === Number(params.accountId));
+    }
+    return {
+      code: 0,
+      data: { list, total: list.length },
+      msg: 'OK'
+    };
+  }
+
+  public createCashTransaction(data: any) {
+    const amount = Number(data.amount) || 0;
+    const account = this.cashAccounts.find(a => a.id === Number(data.accountId));
+    if (account) {
+      if (data.type === 'INCOME') {
+        account.balance += amount;
+      } else {
+        account.balance = Math.max(0, account.balance - amount);
+      }
+      account.updateTime = new Date().toLocaleString('ru-RU');
+    }
+
+    const newTx: MockCashTransaction = {
+      id: this.cashTransactions.length + 1,
+      transactionNo: 'TX-2026-' + String(this.cashTransactions.length + 101).padStart(3, '0'),
+      accountId: Number(data.accountId) || 1,
+      accountName: account?.name || 'Сейф салона (Наличные)',
+      type: data.type || 'INCOME',
+      category: data.category || 'Прочее',
+      amount,
+      relatedOrderNo: data.relatedOrderNo || '',
+      operatorName: data.operatorName || 'Шеф-Администратор',
+      comment: data.comment || '',
+      createTime: new Date().toLocaleString('ru-RU')
+    };
+    this.cashTransactions.unshift(newTx);
+    return { code: 0, data: newTx, msg: 'OK' };
+  }
+
+  public getPurchases(params?: { supplier?: string; status?: string }) {
+    let list = [...this.purchases];
+    if (params?.supplier) {
+      list = list.filter(p => p.supplier.toLowerCase().includes(params.supplier!.toLowerCase()));
+    }
+    if (params?.status) {
+      list = list.filter(p => p.paymentStatus === params.status);
+    }
+    return {
+      code: 0,
+      data: { list, total: list.length },
+      msg: 'OK'
+    };
+  }
+
+  public createPurchase(data: any) {
+    const totalCost = Number(data.totalCost) || (Number(data.quantity) * Number(data.pricePerUnit));
+    const paidAmount = data.paymentStatus === 'PAID' ? totalCost : data.paymentStatus === 'PARTIAL' ? totalCost / 2 : 0;
+    
+    if (paidAmount > 0) {
+      const account = this.cashAccounts.find(a => a.id === (Number(data.accountId) || 3));
+      if (account) {
+        account.balance = Math.max(0, account.balance - paidAmount);
+        account.updateTime = new Date().toLocaleString('ru-RU');
+      }
+
+      this.cashTransactions.unshift({
+        id: this.cashTransactions.length + 1,
+        transactionNo: 'TX-2026-' + String(this.cashTransactions.length + 101).padStart(3, '0'),
+        accountId: account ? account.id : 3,
+        accountName: account ? account.name : 'Расчетный счет KINGSNAME (Банк)',
+        type: 'EXPENSE',
+        category: 'Закупка ткани',
+        amount: paidAmount,
+        relatedOrderNo: data.invoiceNo || 'INV-2026-NEW',
+        operatorName: 'Шеф-Администратор',
+        comment: `Закупка: ${data.materialName} (${data.supplier})`,
+        createTime: new Date().toLocaleString('ru-RU')
+      });
+    }
+
+    const newPurchase: MockPurchase = {
+      id: this.purchases.length + 1,
+      invoiceNo: data.invoiceNo || 'LP-2026-' + (this.purchases.length + 100),
+      supplier: data.supplier || 'Loro Piana S.p.A. (Италия)',
+      materialType: data.materialType || 'FABRIC',
+      materialName: data.materialName || '',
+      quantity: Number(data.quantity) || 10,
+      unit: data.unit || 'м',
+      pricePerUnit: Number(data.pricePerUnit) || 12000,
+      totalCost,
+      paymentStatus: data.paymentStatus || 'PAID',
+      accountId: Number(data.accountId) || 3,
+      paidAmount,
+      arrivalDate: data.arrivalDate || '2026-10-01',
+      createTime: new Date().toISOString().split('T')[0]
+    };
+    this.purchases.unshift(newPurchase);
+    return { code: 0, data: newPurchase, msg: 'OK' };
+  }
+
+  public getOrderEconomics() {
+    return {
+      code: 0,
+      data: { list: [...this.orderEconomics], total: this.orderEconomics.length },
       msg: 'OK'
     };
   }

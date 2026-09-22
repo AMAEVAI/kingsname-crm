@@ -194,6 +194,79 @@ export const api = {
     const res = await request.get('/kings/dashboard/analytics');
     return res.data.data;
   },
+
+  // 6. Finance & Accounting
+  getFinanceOverview: async () => {
+    if (USE_MOCK) {
+      await delay(100);
+      return mockDb.getFinanceOverview().data;
+    }
+    const res = await request.get('/kings/finance/overview');
+    return res.data.data;
+  },
+
+  getChannelAnalytics: async () => {
+    if (USE_MOCK) {
+      await delay(80);
+      return mockDb.getChannelAnalytics().data;
+    }
+    const res = await request.get('/kings/finance/channels');
+    return res.data.data;
+  },
+
+  getCashAccounts: async () => {
+    if (USE_MOCK) {
+      await delay(60);
+      return mockDb.getCashAccounts().data;
+    }
+    const res = await request.get('/kings/finance/accounts');
+    return res.data.data;
+  },
+
+  getCashTransactions: async (params?: { type?: string; accountId?: number }) => {
+    if (USE_MOCK) {
+      await delay(80);
+      return mockDb.getCashTransactions(params).data;
+    }
+    const res = await request.get('/kings/finance/transactions', { params });
+    return res.data.data;
+  },
+
+  createCashTransaction: async (data: any) => {
+    if (USE_MOCK) {
+      await delay(100);
+      return mockDb.createCashTransaction(data).data;
+    }
+    const res = await request.post('/kings/finance/transactions/create', data);
+    return res.data.data;
+  },
+
+  getPurchases: async (params?: { supplier?: string; status?: string }) => {
+    if (USE_MOCK) {
+      await delay(80);
+      return mockDb.getPurchases(params).data;
+    }
+    const res = await request.get('/kings/finance/purchases', { params });
+    return res.data.data;
+  },
+
+  createPurchase: async (data: any) => {
+    if (USE_MOCK) {
+      await delay(100);
+      return mockDb.createPurchase(data).data;
+    }
+    const res = await request.post('/kings/finance/purchases/create', data);
+    return res.data.data;
+  },
+
+  getOrderEconomics: async () => {
+    if (USE_MOCK) {
+      await delay(80);
+      return mockDb.getOrderEconomics().data;
+    }
+    const res = await request.get('/kings/finance/order-economics');
+    return res.data.data;
+  },
 };
 
 function delay(ms: number) {

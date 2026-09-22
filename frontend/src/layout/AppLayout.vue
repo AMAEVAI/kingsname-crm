@@ -42,6 +42,18 @@
           <span class="kn-nav-label">Заказы и Пошив</span>
         </router-link>
 
+        <router-link
+          v-if="userStore.canAccessFinance"
+          to="/finance"
+          class="kn-nav-item"
+          active-class="active"
+          @click="mobileMenuOpen = false"
+        >
+          <BadgeDollarSign :size="19" :stroke-width="1.8" class="kn-nav-icon" />
+          <span class="kn-nav-label">Бухгалтерия и Касса</span>
+          <span class="kn-admin-pill">Финансы</span>
+        </router-link>
+
         <router-link to="/clients" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <Users :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">База VIP-Клиентов</span>
@@ -162,6 +174,7 @@ import {
   Users,
   Package,
   ShieldCheck,
+  BadgeDollarSign,
   Instagram,
   Globe,
   MapPin,

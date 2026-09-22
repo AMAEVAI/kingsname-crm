@@ -38,6 +38,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true, title: 'Склад костюмов и Ткани' },
       },
       {
+        path: 'finance',
+        name: 'Finance',
+        component: () => import('@/views/finance/index.vue'),
+        meta: { requiresAuth: true, title: 'Бухгалтерия и Касса', roles: ['admin', 'manager'] },
+      },
+      {
         path: 'security',
         name: 'Security',
         component: () => import('@/views/security/index.vue'),
@@ -58,11 +64,20 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('kingsname_token');
+  const userStr = localStorage.getItem('kingsname_user');
+  const user = userStr ? JSON.parse(userStr) : null;
 
   if (to.meta.requiresAuth !== false && !token) {
     next({ path: '/login' });
   } else if (to.path === '/login' && token) {
     next({ path: '/dashboard' });
+  } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
+    const userRole = user?.roleCode || '';
+    if (!to.meta.roles.includes(userRole)) {
+      next({ path: '/dashboard' });
+    } else {
+      next();
+    }
   } else {
     next();
   }

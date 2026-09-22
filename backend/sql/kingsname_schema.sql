@@ -242,7 +242,101 @@ VALUES
 ('SHIRT', 'KN-SHIRT-WHT-40', 'Сорочка ручной работы Poplin White', '50', '176-182', 'Белый', 12, 'шт', 3, 16000.00),
 ('ACCESSORY', 'KN-ACC-TIE-GOLD', 'Галстук шелковый KINGSNAME Gold Accent', NULL, NULL, 'Gold/Navy', 15, 'шт', 5, 8500.00);
 
--- 5. Seed initial login log
+-- ------------------------------------------------------------------------------
+-- 6. Table: kings_cash_account (Liquid Capital: Safe, POS Terminal, Bank)
+-- ------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `kings_cash_account`;
+CREATE TABLE `kings_cash_account` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `name` VARCHAR(128) NOT NULL COMMENT 'Account Name (Сейф, POS, Банк)',
+  `account_type` VARCHAR(32) NOT NULL COMMENT 'CASH, POS, BANK',
+  `balance` DECIMAL(14, 2) NOT NULL DEFAULT 0.00 COMMENT 'Current balance in rubles',
+  `currency` VARCHAR(8) NOT NULL DEFAULT 'RUB' COMMENT 'RUB',
+  `account_no` VARCHAR(64) DEFAULT NULL COMMENT 'IBAN or Internal identifier',
+  `creator` VARCHAR(64) DEFAULT '' COMMENT 'Creator',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
+  `updater` VARCHAR(64) DEFAULT '' COMMENT 'Updater',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT 'Soft delete flag',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KINGSNAME Cash & Bank Accounts';
+
+-- ------------------------------------------------------------------------------
+-- 7. Table: kings_cash_transaction (Cash Flow & Orders Ledger)
+-- ------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `kings_cash_transaction`;
+CREATE TABLE `kings_cash_transaction` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `transaction_no` VARCHAR(64) NOT NULL COMMENT 'TX Number',
+  `account_id` BIGINT NOT NULL COMMENT 'Foreign Key to kings_cash_account',
+  `account_name` VARCHAR(128) NOT NULL COMMENT 'Account Name snapshot',
+  `type` VARCHAR(16) NOT NULL COMMENT 'INCOME, EXPENSE',
+  `category` VARCHAR(64) NOT NULL COMMENT 'Cash flow category (Предоплата, Закупка, Оплата портному)',
+  `amount` DECIMAL(14, 2) NOT NULL COMMENT 'Transaction amount in rubles',
+  `related_order_no` VARCHAR(64) DEFAULT NULL COMMENT 'Related Order No',
+  `operator_name` VARCHAR(64) NOT NULL COMMENT 'Operator who registered transaction',
+  `comment` TEXT DEFAULT NULL COMMENT 'Purpose and notes',
+  `creator` VARCHAR(64) DEFAULT '' COMMENT 'Creator',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
+  `updater` VARCHAR(64) DEFAULT '' COMMENT 'Updater',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT 'Soft delete flag',
+  PRIMARY KEY (`id`),
+  KEY `idx_account_id` (`account_id`),
+  KEY `idx_type` (`type`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KINGSNAME Cash Transactions Ledger';
+
+-- ------------------------------------------------------------------------------
+-- 8. Table: kings_purchase (European Fabrics & Haberdashery Invoices)
+-- ------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `kings_purchase`;
+CREATE TABLE `kings_purchase` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `invoice_no` VARCHAR(64) NOT NULL COMMENT 'Supplier Invoice No',
+  `supplier` VARCHAR(128) NOT NULL COMMENT 'Loro Piana, VBC, Scabal, Dormeuil',
+  `material_type` VARCHAR(32) NOT NULL COMMENT 'FABRIC, LINING, BUTTONS, ACCESSORY',
+  `material_name` VARCHAR(256) NOT NULL COMMENT 'Fabric/material description',
+  `quantity` DECIMAL(10, 2) NOT NULL COMMENT 'Length or pieces',
+  `unit` VARCHAR(16) NOT NULL DEFAULT 'м' COMMENT 'м, шт, компл',
+  `price_per_unit` DECIMAL(12, 2) NOT NULL COMMENT 'Purchase price per unit in rubles',
+  `total_cost` DECIMAL(14, 2) NOT NULL COMMENT 'Total invoice amount',
+  `payment_status` VARCHAR(32) NOT NULL DEFAULT 'PAID' COMMENT 'PAID, PARTIAL, UNPAID',
+  `account_id` BIGINT DEFAULT NULL COMMENT 'Account used for payment',
+  `paid_amount` DECIMAL(14, 2) NOT NULL DEFAULT 0.00 COMMENT 'Already paid amount',
+  `arrival_date` DATE DEFAULT NULL COMMENT 'Arrival date in salon',
+  `creator` VARCHAR(64) DEFAULT '' COMMENT 'Creator',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
+  `updater` VARCHAR(64) DEFAULT '' COMMENT 'Updater',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT 'Soft delete flag',
+  PRIMARY KEY (`id`),
+  KEY `idx_supplier` (`supplier`),
+  KEY `idx_payment_status` (`payment_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KINGSNAME Fabrics & Materials Purchases';
+
+-- 6. Seed Cash Accounts
+INSERT INTO `kings_cash_account` (`id`, `name`, `account_type`, `balance`, `currency`, `account_no`)
+VALUES
+(1, 'Сейф салона (Наличные)', 'CASH', 1420000.00, 'RUB', 'SAFE-GROZNY-01'),
+(2, 'POS-терминал / СБП (Эквайринг)', 'POS', 1980000.00, 'RUB', 'POS-KNG-9801'),
+(3, 'Расчетный счет KINGSNAME (Банк)', 'BANK', 1450000.00, 'RUB', '40702810900000088888');
+
+-- 7. Seed Purchases
+INSERT INTO `kings_purchase` (`invoice_no`, `supplier`, `material_type`, `material_name`, `quantity`, `unit`, `price_per_unit`, `total_cost`, `payment_status`, `account_id`, `paid_amount`, `arrival_date`)
+VALUES
+('LP-2026-88', 'Loro Piana S.p.A. (Италия)', 'FABRIC', 'Шерсть Super 150s Tasmanian Navy Twill', 25.0, 'м', 15400.00, 385000.00, 'PAID', 3, 385000.00, '2026-09-18'),
+('VBC-2026-04', 'Vitale Barberis Canonico (Италия)', 'FABRIC', 'Шерсть Super 130s Perennial Charcoal', 30.0, 'м', 9200.00, 276000.00, 'PAID', 3, 276000.00, '2026-09-20'),
+('SC-2026-12', 'Scabal (Англия/Бельгия)', 'FABRIC', 'Diamond Chip Super 180s Midnight Blue', 15.0, 'м', 28000.00, 420000.00, 'PARTIAL', 3, 210000.00, '2026-09-25');
+
+-- 8. Seed Cash Transactions
+INSERT INTO `kings_cash_transaction` (`transaction_no`, `account_id`, `account_name`, `type`, `category`, `amount`, `related_order_no`, `operator_name`, `comment`)
+VALUES
+('TX-2026-001', 2, 'POS-терминал / СБП (Эквайринг)', 'INCOME', 'Предоплата 50%', 120000.00, 'KN-202609-001', 'Шеф-Администратор', 'Предоплата за пошив костюма Loro Piana'),
+('TX-2026-002', 1, 'Сейф салона (Наличные)', 'INCOME', '100% Оплата', 280000.00, 'KN-202609-002', 'Менеджер', 'Полный расчет за смокинг Black Tie Scabal'),
+('TX-2026-003', 3, 'Расчетный счет KINGSNAME (Банк)', 'EXPENSE', 'Закупка ткани', 385000.00, 'LP-2026-88', 'Шеф-Администратор', 'Оплата инвойса Loro Piana S.p.A. (25м Super 150s Tasmanian)');
+
+-- 9. Seed initial login log
 INSERT INTO `sys_login_log` (`code`, `user_name`, `role_code`, `ip`, `user_agent`, `result_status`, `result_msg`, `login_time`)
 VALUES
 ('88888888', 'Шеф-Администратор KINGSNAME', 'admin', '127.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 1, 'Успешная авторизация по мастер-коду администратора', NOW());

@@ -16,6 +16,7 @@ export const useUserStore = defineStore('user', {
   getters: {
     isLoggedIn: (state) => !!state.token,
     isAdmin: (state) => state.user?.roleCode === 'admin',
+    canAccessFinance: (state) => ['admin', 'manager'].includes(state.user?.roleCode || ''),
     userName: (state) => state.user?.userName || 'Сотрудник',
     roleLabel: (state) => {
       switch (state.user?.roleCode) {
