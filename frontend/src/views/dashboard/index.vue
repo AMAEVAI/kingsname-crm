@@ -109,7 +109,15 @@
         <div>
           <div class="kn-funnel-title-row">
             <h2 class="kn-section-title font-brand">Воронка Продаж и Индивидуального Пошива KINGSNAME</h2>
-            <span v-if="isMobile" class="kn-swipe-hint font-outfit">Свайп ➔</span>
+            <button
+              v-if="isMobile"
+              class="kn-swipe-hint-btn font-outfit"
+              @click="scrollFunnel(1)"
+              title="Перейти к следующему этапу"
+            >
+              <span>Свайп</span>
+              <ChevronRight :size="13" />
+            </button>
           </div>
           <p class="kn-section-sub">
             Жизненный цикл классического мужского костюма: от обращения в Instagram до выдачи клиенту
@@ -121,14 +129,26 @@
         </button>
       </div>
 
-      <!-- Funnel Progress Steps Grid -->
-      <div class="kn-funnel-steps">
+      <!-- Funnel Progress Steps Grid with Swipe & Mouse Drag -->
+      <div
+        ref="funnelRef"
+        class="kn-funnel-steps"
+        :class="{ 'is-dragging': isDragging }"
+        @mousedown="startDrag"
+        @mousemove="onDrag"
+        @mouseup="endDrag"
+        @mouseleave="endDrag"
+        @touchstart.passive="onTouchStart"
+        @touchmove.passive="onTouchMove"
+        @touchend="onTouchEnd"
+        @scroll.passive="onFunnelScroll"
+      >
         <div
           v-for="(stage, idx) in funnelStages"
           :key="stage.key"
           class="kn-funnel-card"
           :class="{ active: selectedFunnelStage === stage.key }"
-          @click="filterByStage(stage.key)"
+          @click="handleStageClick(stage.key)"
         >
           <div class="kn-funnel-top">
             <span class="kn-step-num">0{{ idx + 1 }}</span>
@@ -151,6 +171,40 @@
 
           <div class="kn-funnel-indicator"></div>
         </div>
+      </div>
+
+      <!-- Mobile / Responsive Stepper Navigation Controls -->
+      <div v-if="isMobile" class="kn-funnel-stepper-bar">
+        <button
+          class="kn-stepper-arrow-btn"
+          :disabled="currentFunnelIndex === 0"
+          @click="scrollFunnel(-1)"
+          aria-label="Предыдущий этап"
+        >
+          <ChevronLeft :size="15" />
+        </button>
+
+        <div class="kn-stepper-dots">
+          <button
+            v-for="(stage, idx) in funnelStages"
+            :key="stage.key"
+            class="kn-stepper-dot"
+            :class="{ active: currentFunnelIndex === idx }"
+            @click="scrollToStageIndex(idx)"
+            :aria-label="'Этап ' + (idx + 1) + ': ' + stage.label"
+          >
+            <span class="kn-dot-inner"></span>
+          </button>
+        </div>
+
+        <button
+          class="kn-stepper-arrow-btn"
+          :disabled="currentFunnelIndex >= funnelStages.length - 1"
+          @click="scrollFunnel(1)"
+          aria-label="Следующий этап"
+        >
+          <ChevronRight :size="15" />
+        </button>
       </div>
     </div>
 
@@ -352,7 +406,9 @@ import {
   CreditCard,
   Shirt,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -418,6 +474,92 @@ const getStageCount = (stageKey: string) => {
 const getStageSum = (stageKey: string) => {
   const match = analytics.value.funnel?.find((f: any) => f.stage === stageKey);
   return match ? match.totalAmount : 0;
+};
+
+const funnelRef = ref<HTMLDivElement>();
+const isDragging = ref(false);
+const startX = ref(0);
+const scrollLeftStart = ref(0);
+const hasDragged = ref(false);
+const currentFunnelIndex = ref(0);
+
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+
+const startDrag = (e: MouseEvent) => {
+  if (!funnelRef.value) return;
+  isDragging.value = true;
+  hasDragged.value = false;
+  startX.value = e.pageX - funnelRef.value.offsetLeft;
+  scrollLeftStart.value = funnelRef.value.scrollLeft;
+};
+
+const onDrag = (e: MouseEvent) => {
+  if (!isDragging.value || !funnelRef.value) return;
+  e.preventDefault();
+  const x = e.pageX - funnelRef.value.offsetLeft;
+  const walk = (x - startX.value) * 1.5;
+  if (Math.abs(walk) > 4) {
+    hasDragged.value = true;
+  }
+  funnelRef.value.scrollLeft = scrollLeftStart.value - walk;
+};
+
+const endDrag = () => {
+  if (!isDragging.value) return;
+  isDragging.value = false;
+  setTimeout(() => {
+    hasDragged.value = false;
+  }, 100);
+};
+
+const onTouchStart = (e: TouchEvent) => {
+  if (!e.touches[0]) return;
+  touchStartX.value = e.touches[0].clientX;
+  touchStartY.value = e.touches[0].clientY;
+  hasDragged.value = false;
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (!e.touches[0]) return;
+  const deltaX = Math.abs(e.touches[0].clientX - touchStartX.value);
+  const deltaY = Math.abs(e.touches[0].clientY - touchStartY.value);
+  if (deltaX > 6 || deltaY > 6) {
+    hasDragged.value = true;
+  }
+};
+
+const onTouchEnd = () => {
+  if (hasDragged.value) {
+    setTimeout(() => {
+      hasDragged.value = false;
+    }, 150);
+  }
+};
+
+const handleStageClick = (stageKey: string) => {
+  if (hasDragged.value) return;
+  filterByStage(stageKey);
+};
+
+const scrollFunnel = (direction: number) => {
+  if (!funnelRef.value) return;
+  const step = 215; // 205px card + 10px gap
+  funnelRef.value.scrollBy({ left: direction * step, behavior: 'smooth' });
+};
+
+const scrollToStageIndex = (idx: number) => {
+  if (!funnelRef.value) return;
+  const step = 215;
+  funnelRef.value.scrollTo({ left: idx * step, behavior: 'smooth' });
+  currentFunnelIndex.value = idx;
+};
+
+const onFunnelScroll = () => {
+  if (!funnelRef.value) return;
+  const step = 215;
+  const idx = Math.round(funnelRef.value.scrollLeft / step);
+  currentFunnelIndex.value = Math.max(0, Math.min(funnelStages.length - 1, idx));
 };
 
 const filterByStage = (stageKey: string) => {
@@ -1014,14 +1156,95 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.kn-swipe-hint {
+.kn-swipe-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
-  padding: 2px 8px;
+  font-weight: 600;
+  padding: 3px 10px;
   border-radius: 12px;
   background: rgba(197, 160, 89, 0.15);
-  border: 1px solid rgba(197, 160, 89, 0.3);
+  border: 1px solid rgba(197, 160, 89, 0.35);
   color: var(--kn-gold-light);
   letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover, &:active {
+    background: rgba(197, 160, 89, 0.28);
+    border-color: var(--kn-gold-primary);
+    color: #FFFFFF;
+  }
+}
+
+.kn-funnel-stepper-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding-top: 4px;
+}
+
+.kn-stepper-arrow-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(197, 160, 89, 0.12);
+  border: 1px solid rgba(197, 160, 89, 0.28);
+  color: var(--kn-gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled), &:active:not(:disabled) {
+    background: rgba(197, 160, 89, 0.28);
+    border-color: var(--kn-gold-primary);
+    color: #FFFFFF;
+    transform: scale(1.08);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--kn-text-muted);
+  }
+}
+
+.kn-stepper-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.kn-stepper-dot {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .kn-dot-inner {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(197, 160, 89, 0.25);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.active .kn-dot-inner {
+    width: 20px;
+    border-radius: 4px;
+    background: var(--kn-gold-primary);
+    box-shadow: 0 0 8px rgba(197, 160, 89, 0.6);
+  }
 }
 
 /* Mobile Order Cards */
@@ -1279,11 +1502,27 @@ onUnmounted(() => {
   .kn-funnel-steps {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     gap: 10px;
-    padding: 4px 2px 10px 2px;
+    padding: 6px 4px 12px 4px;
     margin: 0 -2px;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
+      scroll-behavior: auto;
+    }
   }
 
   .kn-funnel-card {
@@ -1293,6 +1532,9 @@ onUnmounted(() => {
     padding: 12px;
     scroll-snap-align: start;
     border-radius: 10px;
+    touch-action: pan-x;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .kn-stage-name {
