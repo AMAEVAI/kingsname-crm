@@ -1,0 +1,37 @@
+server:
+  port: 48080
+  servlet:
+    context-path: /admin-api
+
+spring:
+  application:
+    name: kingsname-crm-server
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:kingsname_crm}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Europe/Moscow&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Europe/Moscow
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# KINGSNAME Security & Access Code Configuration
+kingsname:
+  security:
+    jwt:
+      secret: KINGSNAME_BESPOKE_SARTORIAL_GROZNY_SECRET_KEY_2026_SECURITY_TOKEN_HASH
+      expiration-seconds: 86400 # 24 hours
+    code:
+      default-master-code: "88888888"
+      max-failed-attempts: 3
+      lockout-minutes: 15
