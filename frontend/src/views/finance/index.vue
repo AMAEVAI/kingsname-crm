@@ -55,54 +55,81 @@
       </div>
     </div>
 
-    <!-- 2. Navigation Tabs (Responsive Segmented Layout) -->
-    <div class="kn-finance-nav-wrap">
-      <div class="kn-finance-nav">
-        <button
-          class="kn-finance-tab"
-          :class="{ active: activeTab === 'pnl' }"
-          @click="activeTab = 'pnl'"
-        >
-          <TrendingUp :size="15" />
-          <span>Сводка P&L</span>
-        </button>
+    <!-- 2. Navigation Tabs (Responsive Segmented Layout with Luxury Slider) -->
+    <div class="kn-nav-section">
+      <div 
+        ref="navWrapRef" 
+        class="kn-finance-nav-wrap"
+        @scroll.passive="updateNavScroll"
+      >
+        <div class="kn-finance-nav">
+          <button
+            class="kn-finance-tab"
+            :class="{ active: activeTab === 'pnl' }"
+            @click="selectTab('pnl', $event)"
+          >
+            <TrendingUp :size="15" />
+            <span>Сводка P&L</span>
+          </button>
 
-        <button
-          class="kn-finance-tab"
-          :class="{ active: activeTab === 'channels' }"
-          @click="activeTab = 'channels'"
-        >
-          <Share2 :size="15" />
-          <span>Каналы Лидов</span>
-          <span class="kn-tab-badge">IG • WA</span>
-        </button>
+          <button
+            class="kn-finance-tab"
+            :class="{ active: activeTab === 'channels' }"
+            @click="selectTab('channels', $event)"
+          >
+            <Share2 :size="15" />
+            <span>Каналы Лидов</span>
+            <span class="kn-tab-badge">IG • WA • TG</span>
+          </button>
 
-        <button
-          class="kn-finance-tab"
-          :class="{ active: activeTab === 'cash' }"
-          @click="activeTab = 'cash'"
-        >
-          <Receipt :size="15" />
-          <span>Касса & ДДС</span>
-        </button>
+          <button
+            class="kn-finance-tab"
+            :class="{ active: activeTab === 'cash' }"
+            @click="selectTab('cash', $event)"
+          >
+            <Receipt :size="15" />
+            <span>Касса & ДДС</span>
+          </button>
 
-        <button
-          class="kn-finance-tab"
-          :class="{ active: activeTab === 'purchases' }"
-          @click="activeTab = 'purchases'"
-        >
-          <Package :size="15" />
-          <span>Закупки Тканей</span>
-        </button>
+          <button
+            class="kn-finance-tab"
+            :class="{ active: activeTab === 'purchases' }"
+            @click="selectTab('purchases', $event)"
+          >
+            <Package :size="15" />
+            <span>Закупки Тканей</span>
+          </button>
 
-        <button
-          class="kn-finance-tab"
-          :class="{ active: activeTab === 'economics' }"
-          @click="activeTab = 'economics'"
-        >
-          <Percent :size="15" />
-          <span>Юнит-Маржа Заказов</span>
-        </button>
+          <button
+            class="kn-finance-tab"
+            :class="{ active: activeTab === 'economics' }"
+            @click="selectTab('economics', $event)"
+          >
+            <Percent :size="15" />
+            <span>Юнит-Маржа Заказов</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Luxury Interactive Slider Bar ("Ползунок" для мобильных и планшетов) -->
+      <div v-if="canScrollTabs" class="kn-nav-slider-bar">
+        <div class="kn-nav-slider-track" @click="onTrackClick" title="Нажмите или проведите для перехода">
+          <div 
+            class="kn-nav-slider-thumb"
+            :style="{
+              left: `${scrollLeftProgress * 65}%`,
+              width: '35%'
+            }"
+          ></div>
+        </div>
+        <div class="kn-nav-slider-meta">
+          <span class="kn-nav-counter font-outfit">
+            Раздел {{ currentTabNumber }} из 5
+          </span>
+          <span class="kn-nav-hint font-outfit">
+            свайп разделов <ChevronRight :size="12" />
+          </span>
+        </div>
       </div>
     </div>
 
@@ -830,7 +857,8 @@ import {
   MessageSquare,
   Send,
   Crown,
-  Plus
+  Plus,
+  ChevronRight
 } from 'lucide-vue-next';
 
 const { isMobile, modalWidth } = useResponsive();
@@ -864,6 +892,67 @@ const formatChannelShort = (chKey: string) => {
 };
 
 const txTypeFilter = ref('');
+
+// Navigation Scroll Slider State
+const navWrapRef = ref<HTMLDivElement>();
+const scrollLeftProgress = ref(0);
+const canScrollTabs = ref(false);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
+
+const tabKeys = ['pnl', 'channels', 'cash', 'purchases', 'economics'] as const;
+
+const currentTabNumber = computed(() => {
+  const idx = tabKeys.indexOf(activeTab.value);
+  return idx >= 0 ? idx + 1 : 1;
+});
+
+const updateNavScroll = () => {
+  if (!navWrapRef.value) return;
+  const { scrollLeft, scrollWidth, clientWidth } = navWrapRef.value;
+  const maxScroll = scrollWidth - clientWidth;
+  canScrollTabs.value = maxScroll > 6;
+  canScrollLeft.value = scrollLeft > 6;
+  canScrollRight.value = scrollLeft < maxScroll - 6;
+  scrollLeftProgress.value = maxScroll > 0 ? Math.min(1, Math.max(0, scrollLeft / maxScroll)) : 0;
+};
+
+const selectTab = (tabKey: 'pnl' | 'channels' | 'cash' | 'purchases' | 'economics', event?: MouseEvent) => {
+  activeTab.value = tabKey;
+  if (event?.currentTarget) {
+    (event.currentTarget as HTMLElement).scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest'
+    });
+  }
+  nextTick(() => updateNavScroll());
+};
+
+const scrollToActiveTab = () => {
+  if (!navWrapRef.value) return;
+  const activeEl = navWrapRef.value.querySelector('.kn-finance-tab.active') as HTMLElement;
+  if (activeEl) {
+    activeEl.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest'
+    });
+  }
+};
+
+const onTrackClick = (e: MouseEvent) => {
+  if (!navWrapRef.value) return;
+  const track = e.currentTarget as HTMLElement;
+  const rect = track.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+  const maxScroll = navWrapRef.value.scrollWidth - navWrapRef.value.clientWidth;
+  navWrapRef.value.scrollTo({
+    left: ratio * maxScroll,
+    behavior: 'smooth'
+  });
+};
 
 // Chart DOM refs & instances
 const pnlChartRef = ref<HTMLDivElement>();
@@ -903,11 +992,14 @@ onMounted(async () => {
   await loadAllData();
   await nextTick();
   initCharts();
+  updateNavScroll();
   window.addEventListener('resize', handleResize);
+  window.addEventListener('resize', updateNavScroll);
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('resize', updateNavScroll);
   pnlChartInstance.value?.dispose();
   expenseChartInstance.value?.dispose();
   channelPieChartInstance.value?.dispose();
@@ -941,8 +1033,11 @@ const loadAllData = async () => {
 
 watch(activeTab, async (newTab) => {
   await nextTick();
+  scrollToActiveTab();
+  updateNavScroll();
   setTimeout(() => {
     handleResize();
+    updateNavScroll();
     if (newTab === 'pnl') {
       initPnlChart();
       initExpenseChart();
@@ -1386,19 +1481,47 @@ const formatMoney = (val: number) => {
   color: #FFFFFF;
 }
 
-/* 2. Navigation Tabs */
+/* 2. Navigation Tabs & Slider */
+.kn-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
 .kn-finance-nav-wrap {
+  position: relative;
   overflow-x: auto;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
-  margin: -4px 0;
-  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 4px 2px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(197, 160, 89, 0.4) transparent;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+    display: block;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(197, 160, 89, 0.35);
+    border-radius: 999px;
+    &:hover {
+      background: var(--kn-gold-primary);
+    }
+  }
 }
 
 .kn-finance-nav {
   display: flex;
   gap: 8px;
-  min-width: max-content;
+  width: max-content;
+  min-width: 100%;
+  padding-bottom: 2px;
 }
 
 .kn-finance-tab {
@@ -1413,8 +1536,10 @@ const formatMoney = (val: number) => {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
 
   &:hover {
     background: rgba(197, 160, 89, 0.08);
@@ -1435,9 +1560,63 @@ const formatMoney = (val: number) => {
   color: #FFFFFF;
   font-size: 9px;
   font-weight: 700;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 8px;
   letter-spacing: 0.04em;
+}
+
+/* Luxury Interactive Slider Bar ("Ползунок") */
+.kn-nav-slider-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 4px;
+  animation: fadeIn 0.3s ease;
+}
+
+.kn-nav-slider-track {
+  position: relative;
+  flex: 1;
+  max-width: 180px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.kn-nav-slider-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--kn-gold-primary), #E5C378);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(197, 160, 89, 0.6);
+  transition: left 0.15s ease-out;
+}
+
+.kn-nav-slider-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.kn-nav-counter {
+  color: var(--kn-gold-primary);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.kn-nav-hint {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--kn-text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* 3. Cards & Grids */
@@ -2149,34 +2328,25 @@ const formatMoney = (val: number) => {
     gap: 8px;
   }
 
-  /* Responsive Segmented Tabs - No cut off */
+  /* Responsive Horizontal Tabs with Luxury Slider */
   .kn-finance-nav-wrap {
-    overflow: visible;
+    overflow-x: auto;
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 2px 0 4px;
   }
 
   .kn-finance-nav {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    width: max-content;
     gap: 8px;
-    width: 100%;
-    min-width: 0;
   }
 
   .kn-finance-tab {
-    width: 100%;
-    padding: 10px 8px;
+    width: auto;
+    flex-shrink: 0;
+    padding: 9px 14px;
     font-size: 12px;
-    justify-content: center;
-    text-align: center;
-    gap: 6px;
-    border-radius: 8px;
-  }
-
-  .kn-finance-tab:last-child {
-    grid-column: span 2;
   }
 
   /* 4 KPI Cards - Perfectly Fitted */
