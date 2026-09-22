@@ -160,7 +160,7 @@
     </div>
 
     <!-- Create / Edit Modal -->
-    <el-dialog v-model="modalVisible" :title="isEdit ? 'Редактировать товар' : 'Добавить товар на склад'" width="520px">
+    <el-dialog v-model="modalVisible" :title="isEdit ? 'Редактировать товар' : 'Добавить товар на склад'" :width="modalWidth">
       <el-form :model="form" label-position="top">
         <el-form-item label="Тип позиции">
           <el-select v-model="form.itemType" style="width: 100%">
@@ -244,6 +244,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useResponsive } from '@/utils/useResponsive';
 import {
   Boxes,
   Briefcase,
@@ -255,6 +256,8 @@ import {
   AlertCircle,
   Trash2
 } from 'lucide-vue-next';
+
+const { modalWidth } = useResponsive();
 
 const loading = ref(false);
 const inventory = ref<any[]>([]);
@@ -577,6 +580,52 @@ const formatMoney = (val: number) => {
 
   &:hover {
     opacity: 1;
+  }
+}
+
+@media (max-width: 1024px) {
+  .kn-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .kn-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .kn-search-wrap {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .kn-inv-kpis {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .kn-type-tabs {
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kn-type-tab {
+    flex-shrink: 0;
+  }
+
+  .kn-table-card {
+    padding: 12px;
+    overflow-x: auto;
+  }
+
+  .kn-gold-button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

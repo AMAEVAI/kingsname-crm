@@ -161,7 +161,7 @@
     </div>
 
     <!-- Generate Code Modal -->
-    <el-dialog v-model="generateModalVisible" title="Выпуск нового 8-значного кода доступа" width="500px">
+    <el-dialog v-model="generateModalVisible" title="Выпуск нового 8-значного кода доступа" :width="modalWidth">
       <el-form :model="codeForm" label-position="top">
         <el-form-item label="ФИО сотрудника / Назначение">
           <el-input v-model="codeForm.userName" placeholder="Например: Мастер-портной Зелимхан" />
@@ -199,6 +199,7 @@
 import { ref, onMounted } from 'vue';
 import { api } from '@/utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useResponsive } from '@/utils/useResponsive';
 import {
   ShieldCheck,
   Crown,
@@ -206,6 +207,8 @@ import {
   Copy,
   Lock
 } from 'lucide-vue-next';
+
+const { modalWidth } = useResponsive();
 
 const loading = ref(false);
 const codes = ref<any[]>([]);
@@ -551,5 +554,52 @@ const revokeCode = (id: number) => {
 .kn-log-code {
   color: var(--kn-gold-light);
   font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .kn-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .kn-security-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kn-sec-status-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .kn-copy-pill {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .kn-status-tag {
+    align-self: flex-start;
+  }
+
+  .kn-table-card {
+    padding: 14px;
+    overflow-x: auto;
+  }
+
+  .kn-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .kn-gold-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

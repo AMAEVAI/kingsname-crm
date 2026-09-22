@@ -117,7 +117,7 @@
     </div>
 
     <!-- Client Modal -->
-    <el-dialog v-model="clientModalVisible" :title="isEdit ? 'Редактировать VIP-Клиента' : 'Новый VIP-Клиент KINGSNAME'" width="500px">
+    <el-dialog v-model="clientModalVisible" :title="isEdit ? 'Редактировать VIP-Клиента' : 'Новый VIP-Клиент KINGSNAME'" :width="modalWidth">
       <el-form :model="clientForm" label-position="top">
         <el-form-item label="ФИО Клиента">
           <el-input v-model="clientForm.name" placeholder="Например: Абубакар Кадыров" />
@@ -160,6 +160,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
+import { useResponsive } from '@/utils/useResponsive';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Search,
@@ -174,6 +175,7 @@ import {
 } from 'lucide-vue-next';
 
 const router = useRouter();
+const { modalWidth, isMobile } = useResponsive();
 
 const clients = ref<any[]>([]);
 const searchQuery = ref('');
@@ -498,6 +500,72 @@ const createOrderForClient = (client: any) => {
       border-color: #EF4444;
       color: #FFFFFF;
     }
+  }
+}
+
+/* ==============================================================================
+   RESPONSIVE MEDIA QUERIES (iPad & Tablet: <=1024px, Mobile: <=640px)
+   ============================================================================== */
+
+@media (max-width: 1024px) {
+  .kn-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .kn-filter-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .kn-search-box {
+    width: 100%;
+  }
+
+  .kn-clients-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kn-page-title {
+    font-size: 20px;
+  }
+
+  .kn-page-subtitle {
+    font-size: 11px;
+  }
+
+  .kn-gold-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .kn-filter-row {
+    flex-direction: column;
+
+    .el-select {
+      width: 100%;
+    }
+  }
+
+  .kn-clients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kn-card-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .kn-action-btn-small {
+    justify-content: center;
+  }
+
+  .kn-footer-icons {
+    justify-content: flex-end;
   }
 }
 </style>

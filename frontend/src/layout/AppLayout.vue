@@ -1,7 +1,12 @@
 <template>
   <div class="kn-app-container">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <transition name="fade">
+      <div v-if="mobileMenuOpen" class="kn-sidebar-backdrop" @click="mobileMenuOpen = false"></div>
+    </transition>
+
     <!-- Sidebar -->
-    <aside class="kn-sidebar">
+    <aside class="kn-sidebar" :class="{ 'mobile-open': mobileMenuOpen }">
       <!-- Brand Logo Header -->
       <div class="kn-sidebar-brand">
         <div class="kn-emblem">
@@ -20,31 +25,34 @@
           <h1 class="kn-brand-title font-brand">KINGSNAME</h1>
           <p class="kn-brand-sub">GROZNY • BESPOKE TAILORING</p>
         </div>
+        <button class="kn-sidebar-close-btn" @click="mobileMenuOpen = false" title="Закрыть меню">
+          <X :size="18" :stroke-width="2" />
+        </button>
       </div>
 
       <!-- Navigation Menu -->
       <nav class="kn-nav">
-        <router-link to="/dashboard" class="kn-nav-item" active-class="active">
+        <router-link to="/dashboard" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <LayoutDashboard :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Аналитика и Дашборд</span>
         </router-link>
 
-        <router-link to="/orders" class="kn-nav-item" active-class="active">
+        <router-link to="/orders" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <Scissors :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Заказы и Пошив</span>
         </router-link>
 
-        <router-link to="/clients" class="kn-nav-item" active-class="active">
+        <router-link to="/clients" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <Users :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">База VIP-Клиентов</span>
         </router-link>
 
-        <router-link to="/inventory" class="kn-nav-item" active-class="active">
+        <router-link to="/inventory" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <Package :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">Склад и Ткани</span>
         </router-link>
 
-        <router-link to="/security" class="kn-nav-item" active-class="active">
+        <router-link to="/security" class="kn-nav-item" active-class="active" @click="mobileMenuOpen = false">
           <ShieldCheck :size="19" :stroke-width="1.8" class="kn-nav-icon" />
           <span class="kn-nav-label">8-Значные Коды Доступа</span>
           <span v-if="userStore.isAdmin" class="kn-admin-pill">Admin</span>
@@ -75,6 +83,22 @@
       <!-- Top Navigation Header -->
       <header class="kn-topbar">
         <div class="kn-topbar-left">
+          <!-- Mobile Menu Toggle Button -->
+          <button
+            class="kn-mobile-toggle-btn"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            :title="mobileMenuOpen ? 'Закрыть меню' : 'Открыть меню'"
+          >
+            <component :is="mobileMenuOpen ? X : Menu" :size="20" :stroke-width="2" />
+          </button>
+
+          <!-- Mobile Brand Title -->
+          <div class="kn-mobile-brand">
+            <span class="kn-mobile-emblem">👑</span>
+            <span class="kn-mobile-brand-title font-brand">KINGSNAME</span>
+          </div>
+
+          <!-- Location Badge (Desktop/iPad) -->
           <div class="kn-location-badge">
             <MapPin :size="15" :stroke-width="1.8" class="kn-loc-icon" />
             <span>Грозный, Чеченская Республика • Премиальный Салон KINGSNAME</span>
@@ -96,7 +120,7 @@
           <!-- Logout Button -->
           <button class="kn-logout-btn" @click="handleLogout" title="Выйти из системы">
             <LogOut :size="15" :stroke-width="1.8" class="kn-logout-icon" />
-            <span>Выход</span>
+            <span class="kn-logout-text">Выход</span>
           </button>
         </div>
       </header>
@@ -114,6 +138,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user';
 import { ElMessageBox } from 'element-plus';
 import {
@@ -125,10 +151,18 @@ import {
   Instagram,
   Globe,
   MapPin,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-vue-next';
 
 const userStore = useUserStore();
+const route = useRoute();
+const mobileMenuOpen = ref(false);
+
+watch(() => route.fullPath, () => {
+  mobileMenuOpen.value = false;
+});
 
 const handleLogout = () => {
   ElMessageBox.confirm('Завершить текущую рабочую смену?', 'Выход из CRM KINGSNAME', {
@@ -420,6 +454,67 @@ const handleLogout = () => {
   flex: 1;
   padding: 32px;
   background-color: var(--kn-bg-primary);
+  width: 100%;
+}
+
+/* Mobile Toggle & Brand in Topbar */
+.kn-mobile-toggle-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--kn-gold-border);
+  color: var(--kn-gold-primary);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(197, 160, 89, 0.2);
+    color: #FFFFFF;
+  }
+}
+
+.kn-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 8px;
+
+  .kn-mobile-emblem {
+    font-size: 18px;
+  }
+
+  .kn-mobile-brand-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #DFBE7A;
+    letter-spacing: 0.1em;
+  }
+}
+
+.kn-sidebar-close-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--kn-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #FFFFFF;
+  }
+}
+
+.kn-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 998;
 }
 
 /* Transitions */
@@ -436,5 +531,107 @@ const handleLogout = () => {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ==============================================================================
+   RESPONSIVE MEDIA QUERIES (iPad & Tablet: <=1024px, Mobile: <=768px)
+   ============================================================================== */
+
+@media (max-width: 1024px) {
+  .kn-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+
+    &.mobile-open {
+      transform: translateX(0);
+      box-shadow: 12px 0 32px rgba(0, 0, 0, 0.85);
+    }
+  }
+
+  .kn-sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kn-main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .kn-topbar {
+    padding: 0 20px;
+    height: 64px;
+  }
+
+  .kn-mobile-toggle-btn {
+    display: flex;
+  }
+
+  .kn-mobile-brand {
+    display: flex;
+  }
+
+  .kn-location-badge {
+    display: none;
+  }
+
+  .kn-content {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kn-topbar {
+    padding: 0 14px;
+    height: 60px;
+  }
+
+  .kn-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .kn-topbar-right {
+    gap: 10px;
+  }
+
+  .kn-user-pill {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .kn-user-info {
+    display: none;
+  }
+
+  .kn-logout-btn {
+    padding: 6px 10px;
+  }
+
+  .kn-logout-text {
+    display: none;
+  }
+
+  .kn-content {
+    padding: 16px 12px;
+  }
 }
 </style>

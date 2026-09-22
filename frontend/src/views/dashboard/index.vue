@@ -232,7 +232,7 @@
     </div>
 
     <!-- Quick Lead Modal (Instagram @kingsname) -->
-    <el-dialog v-model="quickLeadVisible" title="Новая Заявка из Instagram @kingsname" width="500px">
+    <el-dialog v-model="quickLeadVisible" title="Новая Заявка из Instagram @kingsname" :width="modalWidth">
       <el-form :model="leadForm" label-position="top">
         <el-form-item label="Instagram аккаунт клиента">
           <el-input v-model="leadForm.instagram" placeholder="@username" />
@@ -263,7 +263,7 @@
     </el-dialog>
 
     <!-- Quick Appointment Modal -->
-    <el-dialog v-model="appointmentVisible" title="Запись на примерку в салон (г. Грозный)" width="500px">
+    <el-dialog v-model="appointmentVisible" title="Запись на примерку в салон (г. Грозный)" :width="modalWidth">
       <el-form :model="appointForm" label-position="top">
         <el-form-item label="ФИО Клиента">
           <el-input v-model="appointForm.name" placeholder="ФИО" />
@@ -292,11 +292,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, shallowRef } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
+import { useResponsive } from '@/utils/useResponsive';
 import { ElMessage } from 'element-plus';
 import * as echarts from 'echarts';
+
+const { modalWidth, isMobile } = useResponsive();
 import {
   Instagram,
   CalendarPlus,
@@ -478,10 +481,18 @@ const saveAppointment = async () => {
 };
 
 // Initialize ECharts
+let trendChartInstance: echarts.ECharts | null = null;
+let categoryChartInstance: echarts.ECharts | null = null;
+
+const handleResize = () => {
+  trendChartInstance?.resize();
+  categoryChartInstance?.resize();
+};
+
 const initCharts = () => {
   if (trendChartRef.value) {
-    const chart = echarts.init(trendChartRef.value);
-    chart.setOption({
+    trendChartInstance = echarts.init(trendChartRef.value);
+    trendChartInstance.setOption({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
@@ -522,8 +533,8 @@ const initCharts = () => {
   }
 
   if (categoryChartRef.value) {
-    const chart = echarts.init(categoryChartRef.value);
-    chart.setOption({
+    categoryChartInstance = echarts.init(categoryChartRef.value);
+    categoryChartInstance.setOption({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
@@ -561,7 +572,15 @@ const initCharts = () => {
       ],
     });
   }
+
+  window.addEventListener('resize', handleResize, { passive: true });
 };
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+  trendChartInstance?.dispose();
+  categoryChartInstance?.dispose();
+});
 </script>
 
 <style scoped lang="scss">
@@ -930,5 +949,77 @@ const initCharts = () => {
 .kn-fin-paid {
   font-size: 11px;
   color: #34D399;
+}
+
+/* ==============================================================================
+   RESPONSIVE MEDIA QUERIES (iPad & Tablet: <=1200px, Mobile: <=768px)
+   ============================================================================== */
+
+@media (max-width: 1200px) {
+  .kn-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .kn-funnel-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .kn-dash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .kn-dash-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .kn-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kn-dash-title {
+    font-size: 20px;
+  }
+
+  .kn-dash-subtitle {
+    font-size: 11px;
+  }
+
+  .kn-btn-action {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .kn-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .kn-funnel-steps {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .kn-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .kn-view-all-orders-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .kn-recent-orders-card {
+    padding: 16px 12px;
+    overflow-x: auto;
+  }
 }
 </style>

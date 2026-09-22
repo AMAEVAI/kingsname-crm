@@ -184,7 +184,7 @@
     <el-drawer
       v-model="drawerVisible"
       :title="isEdit ? `Заказ ${form.orderNo} — Индивидуальный пошив` : 'Новый Заказ Bespoke — KINGSNAME'"
-      size="650px"
+      :size="drawerSize"
       direction="rtl"
     >
       <div class="kn-drawer-body">
@@ -513,7 +513,7 @@
     </el-drawer>
 
     <!-- Printable Tailor Sheet Modal -->
-    <el-dialog v-model="printModalVisible" title="Лист мерок мастера-портного (KINGSNAME)" width="680px">
+    <el-dialog v-model="printModalVisible" title="Лист мерок мастера-портного (KINGSNAME)" :width="printModalWidth">
       <div id="tailor-sheet" class="kn-print-sheet">
         <!-- Print Header -->
         <div class="kn-print-header">
@@ -596,8 +596,8 @@
       </template>
     </el-dialog>
 
-    <!-- Payment Modal -->
-    <el-dialog v-model="paymentModalVisible" title="Прием платежа / Внесение предоплаты" width="450px">
+    <!-- Payment Quick Dialog -->
+    <el-dialog v-model="paymentModalVisible" title="Прием оплаты по заказу" :width="modalWidth">
       <el-form label-position="top">
         <el-form-item label="Сумма к оплате (₽)">
           <el-input-number v-model="payAmount" :min="1000" :step="5000" style="width: 100%" />
@@ -623,6 +623,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from '@/utils/request';
+import { useResponsive } from '@/utils/useResponsive';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Search,
@@ -635,6 +636,7 @@ import {
 } from 'lucide-vue-next';
 
 const route = useRoute();
+const { isMobile, isTablet, isDesktop, drawerSize, modalWidth, printModalWidth } = useResponsive();
 
 const loading = ref(false);
 const orders = ref<any[]>([]);
@@ -1214,5 +1216,86 @@ const formatChannel = (ch: string) => {
   margin-top: 40px;
   border-top: 1px dashed #AAAAAA;
   padding-top: 16px;
+}
+
+/* ==============================================================================
+   RESPONSIVE MEDIA QUERIES (iPad & Tablet: <=1024px, Mobile: <=768px)
+   ============================================================================== */
+
+@media (max-width: 1024px) {
+  .kn-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .kn-filter-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .kn-search-input {
+    width: 100%;
+  }
+
+  .kn-status-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+
+  .kn-status-tab {
+    flex-shrink: 0;
+  }
+
+  .kn-table-card {
+    padding: 16px;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .kn-page-title {
+    font-size: 20px;
+  }
+
+  .kn-page-subtitle {
+    font-size: 11px;
+  }
+
+  .kn-gold-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .kn-filters-card {
+    padding: 14px;
+  }
+
+  .kn-filter-row {
+    flex-direction: column;
+    gap: 10px;
+
+    .el-select {
+      width: 100%;
+    }
+  }
+
+  .kn-print-sheet {
+    padding: 14px;
+    overflow-x: auto;
+  }
+
+  .kn-print-section-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .kn-balance-summary-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 </style>
