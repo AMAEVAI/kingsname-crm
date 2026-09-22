@@ -1,0 +1,193 @@
+/* ==============================================================================
+   KINGSNAME Bespoke Sartorial Luxury Theme System
+   Obsidian Black (#0E0E10) & Noble Royal Gold (#C5A059)
+   ============================================================================== */
+
+:root {
+  --kn-bg-primary: #0A0B0E;
+  --kn-bg-surface: #121318;
+  --kn-bg-card: #191B22;
+  --kn-bg-card-hover: #21232D;
+
+  --kn-gold-primary: #C5A059;
+  --kn-gold-light: #E5CA8F;
+  --kn-gold-dark: #917234;
+  --kn-gold-gradient: linear-gradient(135deg, #DFBE7A 0%, #C5A059 50%, #9D7B38 100%);
+  --kn-gold-glow: rgba(197, 160, 89, 0.22);
+  --kn-gold-border: rgba(197, 160, 89, 0.25);
+  --kn-gold-border-subtle: rgba(197, 160, 89, 0.12);
+
+  --kn-text-white: #FFFFFF;
+  --kn-text-secondary: #9E9FA9;
+  --kn-text-muted: #676874;
+
+  --kn-danger: #EF4444;
+  --kn-success: #10B981;
+  --kn-warning: #F59E0B;
+  --kn-info: #3B82F6;
+
+  /* Element Plus Theme Variables Overrides */
+  --el-color-primary: #C5A059;
+  --el-color-primary-light-3: #DFBE7A;
+  --el-color-primary-light-5: #E8CF9A;
+  --el-color-primary-light-7: #F2E3C2;
+  --el-color-primary-light-9: #FBF6EB;
+  --el-color-primary-dark-2: #9A7B39;
+
+  --el-bg-color: #0A0B0E;
+  --el-bg-color-overlay: #181921;
+  --el-bg-color-page: #0A0B0E;
+  --el-text-color-primary: #FFFFFF;
+  --el-text-color-regular: #D1D2DA;
+  --el-text-color-secondary: #9E9FA9;
+  --el-border-color: rgba(197, 160, 89, 0.2);
+  --el-border-color-light: rgba(197, 160, 89, 0.12);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.05);
+
+  --el-fill-color-blank: #14151C;
+  --el-fill-color: #1A1C24;
+  --el-fill-color-light: #22242E;
+  --el-fill-color-lighter: #2B2D3A;
+
+  --el-card-bg-color: #15161D;
+  --el-dialog-bg-color: #15161D;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--kn-bg-primary);
+  color: var(--kn-text-white);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Luxury Brand Typography */
+.font-brand {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.08em;
+}
+
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0B0E;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.6);
+}
+
+/* Luxury UI Cards */
+.kn-card {
+  background: var(--kn-bg-card);
+  border: 1px solid var(--kn-gold-border-subtle);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kn-card:hover {
+  border-color: var(--kn-gold-border);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 16px var(--kn-gold-glow);
+}
+
+.kn-gold-gradient-text {
+  background: var(--kn-gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.kn-gold-button {
+  background: var(--kn-gold-gradient);
+  color: #0A0B0E;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kn-gold-button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 16px var(--kn-gold-glow);
+  transform: translateY(-1px);
+}
+
+.kn-gold-button:active {
+  transform: translateY(0);
+}
+
+/* Element Plus Custom Overrides */
+.el-table {
+  background-color: transparent !important;
+  color: #D1D2DA !important;
+}
+
+.el-table tr {
+  background-color: transparent !important;
+}
+
+.el-table th.el-table__cell {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  color: #C5A059 !important;
+  font-weight: 600 !important;
+  font-family: 'Outfit', sans-serif !important;
+  border-bottom: 1px solid var(--kn-gold-border-subtle) !important;
+}
+
+.el-table td.el-table__cell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: rgba(197, 160, 89, 0.06) !important;
+}
+
+.el-input__wrapper, .el-select__wrapper {
+  background-color: #121319 !important;
+  border: 1px solid var(--kn-gold-border-subtle) !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+}
+
+.el-input__wrapper.is-focus, .el-select__wrapper.is-focused {
+  border-color: var(--kn-gold-primary) !important;
+  box-shadow: 0 0 8px var(--kn-gold-glow) !important;
+}
+
+.el-dialog, .el-drawer {
+  background-color: #14151C !important;
+  border: 1px solid var(--kn-gold-border) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+.el-dialog__title, .el-drawer__title {
+  color: #C5A059 !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.05em !important;
+}
+
+.el-tag {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+}
