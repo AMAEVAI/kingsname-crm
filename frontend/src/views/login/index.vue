@@ -107,7 +107,7 @@
           <div class="kn-preset-tags">
             <button class="kn-preset-pill master" @click="fillPreset('88888888')">
               <Crown :size="13" :stroke-width="2" class="kn-preset-icon" />
-              <span>88888888 (Шеф-Администратор)</span>
+              <span>88888888 (ADMIN KINGSNAME)</span>
             </button>
             <button class="kn-preset-pill" @click="fillPreset('12345678')">
               <UserCheck :size="13" :stroke-width="2" class="kn-preset-icon" />

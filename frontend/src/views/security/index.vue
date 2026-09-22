@@ -169,7 +169,7 @@
 
         <el-form-item label="Роль и уровень доступа">
           <el-select v-model="codeForm.roleCode" style="width: 100%">
-            <el-option label="Шеф-Администратор (Полный доступ)" value="admin" />
+            <el-option label="ADMIN KINGSNAME (Полный доступ)" value="admin" />
             <el-option label="Консультант салона (Заявки, клиенты, оплата)" value="consultant" />
             <el-option label="Мастер-портной (Мерки, пошив, готовность)" value="tailor" />
             <el-option label="Менеджер сайта и Instagram Direct" value="manager" />
@@ -250,7 +250,7 @@ const copyCode = (code: string) => {
 
 const getRoleTitle = (role: string) => {
   switch (role) {
-    case 'admin': return 'Шеф-Администратор';
+    case 'admin': return 'ADMIN KINGSNAME';
     case 'tailor': return 'Мастер-портной';
     case 'manager': return 'Менеджер Direct';
     case 'consultant':

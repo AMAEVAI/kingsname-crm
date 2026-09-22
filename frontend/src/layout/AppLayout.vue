@@ -139,7 +139,7 @@
             </div>
             <div class="kn-user-info">
               <span class="kn-user-name">{{ userStore.userName }}</span>
-              <span class="kn-user-role">{{ userStore.roleLabel }}</span>
+              <span v-if="userStore.roleLabel" class="kn-user-role">{{ userStore.roleLabel }}</span>
             </div>
           </div>
 
@@ -725,8 +725,8 @@ const handleLogout = () => {
   }
 
   .kn-user-pill {
-    padding: 4px 8px;
-    gap: 6px;
+    padding: 4px 10px;
+    gap: 8px;
   }
 
   .kn-user-avatar {
@@ -736,6 +736,18 @@ const handleLogout = () => {
   }
 
   .kn-user-info {
+    display: flex;
+  }
+
+  .kn-user-name {
+    font-size: 11px;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kn-user-role {
     display: none;
   }
 

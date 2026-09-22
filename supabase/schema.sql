@@ -306,7 +306,7 @@ CREATE POLICY "Enable all for CRM purchases" ON kings_purchase FOR ALL TO anon, 
 -- 1. Коды доступа сотрудников
 INSERT INTO sys_access_code (code, user_id, user_name, role_code, valid_type, expire_time, status, creator)
 VALUES 
-('88888888', 1, 'Шеф-Администратор KINGSNAME', 'admin', 3, NULL, 0, 'SYSTEM'),
+('88888888', 1, 'ADMIN KINGSNAME', 'admin', 3, NULL, 0, 'SYSTEM'),
 ('12345678', 2, 'Мансур (Консультант салона)', 'consultant', 1, timezone('utc'::text, now()) + interval '12 hours', 0, '88888888'),
 ('55555555', 3, 'Мастер-портной Адам', 'tailor', 2, timezone('utc'::text, now()) + interval '24 hours', 0, '88888888'),
 ('77777777', 4, 'Залина (Менеджер @kingsname)', 'manager', 3, NULL, 0, '88888888');
@@ -394,14 +394,14 @@ VALUES
 -- 7. Движение денежных средств (ДДС)
 INSERT INTO kings_cash_transaction (transaction_no, account_id, account_name, type, category, amount, related_order_no, operator_name, comment)
 VALUES
-('TX-2026-001', 2, 'POS-терминал / СБП (Эквайринг)', 'INCOME', 'Предоплата 50%', 120000.00, 'KN-202609-001', 'Шеф-Администратор', 'Предоплата за пошив костюма Loro Piana'),
+('TX-2026-001', 2, 'POS-терминал / СБП (Эквайринг)', 'INCOME', 'Предоплата 50%', 120000.00, 'KN-202609-001', 'ADMIN KINGSNAME', 'Предоплата за пошив костюма Loro Piana'),
 ('TX-2026-002', 1, 'Сейф салона (Наличные)', 'INCOME', '100% Оплата', 280000.00, 'KN-202609-002', 'Менеджер', 'Полный расчет за смокинг Black Tie Scabal'),
-('TX-2026-003', 3, 'Расчетный счет KINGSNAME (Банк)', 'EXPENSE', 'Закупка ткани', 385000.00, 'LP-2026-88', 'Шеф-Администратор', 'Оплата инвойса Loro Piana S.p.A. (25м Super 150s Tasmanian)');
+('TX-2026-003', 3, 'Расчетный счет KINGSNAME (Банк)', 'EXPENSE', 'Закупка ткани', 385000.00, 'LP-2026-88', 'ADMIN KINGSNAME', 'Оплата инвойса Loro Piana S.p.A. (25м Super 150s Tasmanian)');
 
 -- 8. Журнал авторизаций
 INSERT INTO sys_login_log (code, user_name, role_code, ip, user_agent, result_status, result_msg, login_time)
 VALUES
-('88888888', 'Шеф-Администратор KINGSNAME', 'admin', '127.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 1, 'Успешная авторизация по мастер-коду администратора', timezone('utc'::text, now()));
+('88888888', 'ADMIN KINGSNAME', 'admin', '127.0.0.1', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 1, 'Успешная авторизация по мастер-коду администратора', timezone('utc'::text, now()));
 
 -- Синхронизация последовательностей ID (Identity sequences)
 SELECT setval(pg_get_serial_sequence('sys_access_code', 'id'), coalesce(max(id), 1)) FROM sys_access_code;

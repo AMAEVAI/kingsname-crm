@@ -9,36 +9,54 @@ export interface UserInfo {
 }
 
 export const useUserStore = defineStore('user', {
-  state: () => ({
-    token: localStorage.getItem('kingsname_token') || '',
-    user: JSON.parse(localStorage.getItem('kingsname_user') || 'null') as UserInfo | null,
-  }),
+  state: () => {
+    let savedUser: UserInfo | null = null;
+    try {
+      savedUser = JSON.parse(localStorage.getItem('kingsname_user') || 'null');
+      if (savedUser && (savedUser.roleCode === 'admin' || savedUser.userName?.includes('Шеф-Администратор'))) {
+        savedUser.userName = 'ADMIN KINGSNAME';
+        localStorage.setItem('kingsname_user', JSON.stringify(savedUser));
+      }
+    } catch (_) {}
+
+    return {
+      token: localStorage.getItem('kingsname_token') || '',
+      user: savedUser as UserInfo | null,
+    };
+  },
   getters: {
     isLoggedIn: (state) => !!state.token,
     isAdmin: (state) => state.user?.roleCode === 'admin',
     canAccessFinance: (state) => ['admin', 'manager'].includes(state.user?.roleCode || ''),
-    userName: (state) => state.user?.userName || 'Сотрудник',
+    userName: (state) => {
+      if (!state.user) return 'Сотрудник';
+      if (state.user.roleCode === 'admin' || state.user.userName?.includes('Шеф-Администратор')) {
+        return 'ADMIN KINGSNAME';
+      }
+      return state.user.userName;
+    },
     roleLabel: (state) => {
       switch (state.user?.roleCode) {
         case 'admin':
-          return 'Шеф-Администратор';
+          return ''; // Just "ADMIN KINGSNAME"
         case 'tailor':
           return 'Мастер-портной';
         case 'manager':
           return 'Менеджер Direct/Сайт';
         case 'consultant':
         default:
-          return 'Консультант салона';
+          return state.user ? 'Консультант салона' : '';
       }
     },
   },
   actions: {
     async login(code: string) {
       const data = await api.loginByCode(code);
+      const userName = data.roleCode === 'admin' ? 'ADMIN KINGSNAME' : data.userName;
       this.token = data.token;
       this.user = {
         userId: data.userId,
-        userName: data.userName,
+        userName,
         roleCode: data.roleCode,
         code: data.code,
       };

@@ -175,7 +175,7 @@ class MockDatabase {
       id: 1,
       code: '88888888',
       userId: 1,
-      userName: 'Шеф-Администратор KINGSNAME',
+      userName: 'ADMIN KINGSNAME',
       roleCode: 'admin',
       validType: 3,
       expireTime: null,
@@ -589,7 +589,7 @@ class MockDatabase {
     {
       id: 1,
       code: '88888888',
-      userName: 'Шеф-Администратор KINGSNAME',
+      userName: 'ADMIN KINGSNAME',
       roleCode: 'admin',
       ip: '127.0.0.1',
       userAgent: 'Chrome 128 / macOS',
