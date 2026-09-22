@@ -92,13 +92,27 @@
             <component :is="mobileMenuOpen ? X : Menu" :size="20" :stroke-width="2" />
           </button>
 
-          <!-- Mobile Brand Title -->
+          <!-- Luxury Brand Title with Vector Gold Crown -->
           <div class="kn-mobile-brand">
-            <span class="kn-mobile-emblem">👑</span>
-            <span class="kn-mobile-brand-title font-brand">KINGSNAME</span>
+            <div class="kn-mobile-crown">
+              <svg viewBox="0 0 24 24" class="kn-crown-icon-mini">
+                <path fill="url(#goldGradMini)" d="M2 19h20v2H2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2z"/>
+                <defs>
+                  <linearGradient id="goldGradMini" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#DFBE7A"/>
+                    <stop offset="50%" stop-color="#C5A059"/>
+                    <stop offset="100%" stop-color="#9A7B39"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="kn-mobile-brand-texts">
+              <span class="kn-mobile-brand-title font-brand">KINGSNAME</span>
+              <span class="kn-mobile-brand-sub font-brand">GROZNY • BESPOKE</span>
+            </div>
           </div>
 
-          <!-- Location Badge (Desktop/iPad) -->
+          <!-- Location Badge (Desktop) -->
           <div class="kn-location-badge">
             <MapPin :size="15" :stroke-width="1.8" class="kn-loc-icon" />
             <span>Грозный, Чеченская Республика • Премиальный Салон KINGSNAME</span>
@@ -376,6 +390,12 @@ const handleLogout = () => {
   z-index: 40;
 }
 
+.kn-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .kn-location-badge {
   display: flex;
   align-items: center;
@@ -460,19 +480,20 @@ const handleLogout = () => {
 /* Mobile Toggle & Brand in Topbar */
 .kn-mobile-toggle-btn {
   display: none;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--kn-gold-border);
-  color: var(--kn-gold-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(197, 160, 89, 0.28);
+  color: var(--kn-gold-light);
   border-radius: 8px;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 
-  &:hover {
-    background: rgba(197, 160, 89, 0.2);
+  &:hover, &:active {
+    background: rgba(197, 160, 89, 0.15);
+    border-color: var(--kn-gold-primary);
     color: #FFFFFF;
   }
 }
@@ -480,17 +501,43 @@ const handleLogout = () => {
 .kn-mobile-brand {
   display: none;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 
-  .kn-mobile-emblem {
-    font-size: 18px;
+  .kn-mobile-crown {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kn-crown-icon-mini {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 6px rgba(197, 160, 89, 0.35));
+  }
+
+  .kn-mobile-brand-texts {
+    display: flex;
+    flex-direction: column;
   }
 
   .kn-mobile-brand-title {
     font-size: 16px;
     font-weight: 700;
-    color: #DFBE7A;
-    letter-spacing: 0.1em;
+    background: var(--kn-gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.12em;
+    line-height: 1.1;
+  }
+
+  .kn-mobile-brand-sub {
+    font-size: 8px;
+    color: var(--kn-text-muted);
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    margin-top: 1px;
   }
 }
 
@@ -576,8 +623,14 @@ const handleLogout = () => {
   }
 
   .kn-topbar {
-    padding: 0 20px;
-    height: 64px;
+    padding: 0 24px;
+    height: 68px;
+  }
+
+  .kn-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
   .kn-mobile-toggle-btn {
@@ -592,6 +645,21 @@ const handleLogout = () => {
     display: none;
   }
 
+  .kn-user-pill {
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kn-user-info {
+    display: flex;
+  }
+
+  .kn-logout-text {
+    display: inline;
+  }
+
   .kn-content {
     padding: 24px 20px;
   }
@@ -604,9 +672,11 @@ const handleLogout = () => {
   }
 
   .kn-topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .kn-mobile-brand-sub {
+    display: none;
   }
 
   .kn-topbar-right {

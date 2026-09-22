@@ -1121,18 +1121,34 @@ onUnmounted(() => {
 
 @media (max-width: 1024px) {
   .kn-dash-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 16px;
   }
 
   .kn-dash-actions {
-    width: 100%;
     flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .kn-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .kn-kpi-card:first-child {
+    grid-column: span 2;
+  }
+
+  .kn-funnel-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
 
   .kn-charts-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 }
 
