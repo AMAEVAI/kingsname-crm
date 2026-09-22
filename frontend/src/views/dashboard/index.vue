@@ -107,7 +107,10 @@
     <div class="kn-card kn-funnel-section">
       <div class="kn-section-header">
         <div>
-          <h2 class="kn-section-title font-brand">Воронка Продаж и Индивидуального Пошива KINGSNAME</h2>
+          <div class="kn-funnel-title-row">
+            <h2 class="kn-section-title font-brand">Воронка Продаж и Индивидуального Пошива KINGSNAME</h2>
+            <span v-if="isMobile" class="kn-swipe-hint font-outfit">Свайп ➔</span>
+          </div>
           <p class="kn-section-sub">
             Жизненный цикл классического мужского костюма: от обращения в Instagram до выдачи клиенту
           </p>
@@ -184,7 +187,8 @@
         </el-button>
       </div>
 
-      <el-table :data="recentOrders" style="width: 100%">
+      <!-- Desktop Table View -->
+      <el-table v-if="!isMobile" :data="recentOrders" style="width: 100%">
         <el-table-column prop="orderNo" label="№ Заказа" width="150">
           <template #default="{ row }">
             <span class="kn-order-badge font-outfit">{{ row.orderNo }}</span>
@@ -229,6 +233,42 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- Mobile Luxury Cards View -->
+      <div v-else class="kn-mobile-orders-list">
+        <div
+          v-for="row in recentOrders"
+          :key="row.id"
+          class="kn-mobile-order-card"
+          @click="router.push('/orders')"
+        >
+          <div class="kn-mo-header">
+            <span class="kn-order-badge font-outfit">{{ row.orderNo }}</span>
+            <el-tag :type="getStatusTagType(row.status)" size="small" effect="dark">
+              {{ getStatusLabel(row.status) }}
+            </el-tag>
+          </div>
+
+          <div class="kn-mo-client-row">
+            <div class="kn-mo-client-info">
+              <strong class="kn-mo-name">{{ row.clientName }}</strong>
+              <span class="kn-mo-sub">{{ row.clientPhone }} • {{ row.channel }}</span>
+            </div>
+            <div class="kn-mo-amount font-outfit">
+              <span class="kn-mo-price">{{ formatMoney(row.totalAmount) }} ₽</span>
+              <span v-if="row.balanceAmount > 0" class="kn-fin-debt">
+                Остаток: {{ formatMoney(row.balanceAmount) }} ₽
+              </span>
+              <span v-else class="kn-fin-paid">Оплачен 100%</span>
+            </div>
+          </div>
+
+          <div class="kn-mo-suit-row">
+            <span class="kn-mo-suit-type">{{ row.productType }}</span>
+            <span class="kn-fabric-tag font-outfit">{{ row.fabricBrand }}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Lead Modal (Instagram @kingsname) -->
@@ -484,9 +524,61 @@ const saveAppointment = async () => {
 let trendChartInstance: echarts.ECharts | null = null;
 let categoryChartInstance: echarts.ECharts | null = null;
 
+const getCategoryOption = () => {
+  const isSmall = window.innerWidth <= 768;
+  return {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#1C1D24',
+      borderColor: '#C5A059',
+      textStyle: { color: '#FFFFFF' },
+    },
+    legend: {
+      bottom: isSmall ? '1%' : '0%',
+      left: 'center',
+      itemGap: isSmall ? 8 : 12,
+      itemWidth: isSmall ? 8 : 12,
+      itemHeight: isSmall ? 8 : 12,
+      textStyle: {
+        color: '#9E9FA9',
+        fontSize: isSmall ? 10 : 12,
+      },
+    },
+    series: [
+      {
+        name: 'Категория',
+        type: 'pie',
+        center: ['50%', isSmall ? '34%' : '44%'],
+        radius: isSmall ? ['30%', '52%'] : ['45%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 8,
+          borderColor: '#15161D',
+          borderWidth: 2,
+        },
+        label: { show: false },
+        emphasis: {
+          label: { show: true, fontSize: 13, fontWeight: 'bold', color: '#DFBE7A' },
+        },
+        data: [
+          { value: 650000, name: 'Костюмы-тройки', itemStyle: { color: '#C5A059' } },
+          { value: 340000, name: 'Смокинги Black Tie', itemStyle: { color: '#DFBE7A' } },
+          { value: 220000, name: 'Кашемировые пальто', itemStyle: { color: '#8E7032' } },
+          { value: 160000, name: 'Костюмы-двойки', itemStyle: { color: '#5B6075' } },
+          { value: 75000, name: 'Сорочки ручной работы', itemStyle: { color: '#3B82F6' } },
+        ],
+      },
+    ],
+  };
+};
+
 const handleResize = () => {
   trendChartInstance?.resize();
-  categoryChartInstance?.resize();
+  if (categoryChartInstance) {
+    categoryChartInstance.setOption(getCategoryOption());
+    categoryChartInstance.resize();
+  }
 };
 
 const initCharts = () => {
@@ -534,43 +626,7 @@ const initCharts = () => {
 
   if (categoryChartRef.value) {
     categoryChartInstance = echarts.init(categoryChartRef.value);
-    categoryChartInstance.setOption({
-      backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: '#1C1D24',
-        borderColor: '#C5A059',
-        textStyle: { color: '#FFFFFF' },
-      },
-      legend: {
-        bottom: '0%',
-        textStyle: { color: '#9E9FA9' },
-      },
-      series: [
-        {
-          name: 'Категория',
-          type: 'pie',
-          radius: ['45%', '70%'],
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderRadius: 8,
-            borderColor: '#15161D',
-            borderWidth: 2,
-          },
-          label: { show: false },
-          emphasis: {
-            label: { show: true, fontSize: 13, fontWeight: 'bold', color: '#DFBE7A' },
-          },
-          data: [
-            { value: 650000, name: 'Костюмы-тройки', itemStyle: { color: '#C5A059' } },
-            { value: 340000, name: 'Смокинги Black Tie', itemStyle: { color: '#DFBE7A' } },
-            { value: 220000, name: 'Кашемировые пальто', itemStyle: { color: '#8E7032' } },
-            { value: 160000, name: 'Костюмы-двойки', itemStyle: { color: '#5B6075' } },
-            { value: 75000, name: 'Сорочки ручной работы', itemStyle: { color: '#3B82F6' } },
-          ],
-        },
-      ],
-    });
+    categoryChartInstance.setOption(getCategoryOption());
   }
 
   window.addEventListener('resize', handleResize, { passive: true });
@@ -951,6 +1007,104 @@ onUnmounted(() => {
   color: #34D399;
 }
 
+/* Funnel Title Row & Swipe Hint */
+.kn-funnel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kn-swipe-hint {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(197, 160, 89, 0.15);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  color: var(--kn-gold-light);
+  letter-spacing: 0.04em;
+}
+
+/* Mobile Order Cards */
+.kn-mobile-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kn-mobile-order-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(197, 160, 89, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:active {
+    background: rgba(197, 160, 89, 0.1);
+    border-color: var(--kn-gold-primary);
+  }
+}
+
+.kn-mo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kn-mo-client-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.kn-mo-client-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kn-mo-name {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.kn-mo-sub {
+  color: var(--kn-text-muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.kn-mo-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.kn-mo-price {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.kn-mo-suit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.kn-mo-suit-type {
+  font-size: 12px;
+  color: var(--kn-text-secondary);
+}
+
 /* ==============================================================================
    RESPONSIVE MEDIA QUERIES (iPad & Tablet: <=1200px, Mobile: <=768px)
    ============================================================================== */
@@ -983,43 +1137,183 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .kn-dashboard {
+    gap: 18px;
+  }
+
+  .kn-dash-header {
+    gap: 12px;
+  }
+
   .kn-dash-title {
-    font-size: 20px;
+    font-size: 19px;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
   }
 
   .kn-dash-subtitle {
     font-size: 11px;
+    line-height: 1.4;
   }
 
-  .kn-btn-action {
-    flex: 1 1 100%;
+  /* Compact 2-column actions: primary bespoke on top, 2 secondary side-by-side */
+  .kn-dash-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .kn-btn-action.bespoke {
+    grid-column: span 2;
+    order: -1;
+    height: 42px;
+    font-size: 13px;
     justify-content: center;
+    border-radius: 8px;
   }
 
+  .kn-btn-action.insta,
+  .kn-btn-action.appoint {
+    height: 36px;
+    font-size: 11px;
+    padding: 0 8px;
+    justify-content: center;
+    border-radius: 8px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  /* 2-Column Luxury Compact KPI Grid */
   .kn-kpi-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
-  .kn-funnel-steps {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  /* Hero Card: Total Month Revenue */
+  .kn-kpi-card:first-child {
+    grid-column: span 2;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(197, 160, 89, 0.14) 0%, rgba(22, 23, 31, 0.95) 100%);
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+  }
+
+  .kn-kpi-card:first-child .kn-kpi-value {
+    font-size: 26px;
+    margin-bottom: 2px;
+  }
+
+  .kn-kpi-card {
+    padding: 12px 12px;
+    min-height: auto;
+    border-radius: 10px;
+  }
+
+  .kn-kpi-header {
+    margin-bottom: 4px;
+  }
+
+  .kn-kpi-title {
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--kn-text-secondary);
+  }
+
+  .kn-kpi-value {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .kn-kpi-sub {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  /* Horizontal Swipe Funnel Pipeline (Replaces 6 giant stacked bricks) */
+  .kn-funnel-section {
+    padding: 16px 12px;
+    border-radius: 10px;
   }
 
   .kn-section-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .kn-section-title {
+    font-size: 16px;
+  }
+
+  .kn-section-sub {
+    font-size: 11px;
+    line-height: 1.35;
   }
 
   .kn-view-all-orders-btn {
     width: 100%;
     justify-content: center;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .kn-funnel-steps {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 4px 2px 10px 2px;
+    margin: 0 -2px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kn-funnel-card {
+    flex: 0 0 205px;
+    width: 205px;
+    min-height: 110px;
+    padding: 12px;
+    scroll-snap-align: start;
+    border-radius: 10px;
+  }
+
+  .kn-stage-name {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .kn-stage-desc {
+    font-size: 10px;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .kn-metric-count strong {
+    font-size: 13px;
+  }
+
+  .kn-metric-sum {
+    font-size: 11px;
+  }
+
+  /* Charts Container on Mobile */
+  .kn-chart-card {
+    padding: 14px 12px;
+    border-radius: 10px;
+  }
+
+  .kn-echarts-container {
+    height: 280px;
   }
 
   .kn-recent-orders-card {
-    padding: 16px 12px;
-    overflow-x: auto;
+    padding: 14px 12px;
+    border-radius: 10px;
   }
 }
 </style>

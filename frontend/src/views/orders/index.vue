@@ -67,8 +67,9 @@
     </div>
 
     <!-- Orders Table -->
+    <!-- Orders Table (Desktop) / Mobile Cards View -->
     <div class="kn-card kn-table-card">
-      <el-table :data="filteredOrders" style="width: 100%" v-loading="loading">
+      <el-table v-if="!isMobile" :data="filteredOrders" style="width: 100%" v-loading="loading">
         <!-- Order No & Channel -->
         <el-table-column prop="orderNo" label="№ Заказа" width="160">
           <template #default="{ row }">
@@ -178,6 +179,105 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- Mobile Luxury Orders Card List -->
+      <div v-else class="kn-mobile-orders-page" v-loading="loading">
+        <div v-if="filteredOrders.length === 0" class="kn-empty-orders">
+          <span>Нет заказов по выбранному фильтру</span>
+        </div>
+        <div
+          v-for="row in filteredOrders"
+          :key="row.id"
+          class="kn-m-order-fullcard"
+        >
+          <!-- Top Row: Order Code + Channel + Actions -->
+          <div class="kn-mo-top-row">
+            <div class="kn-order-no-cell font-outfit">
+              <span class="kn-order-code">{{ row.orderNo }}</span>
+              <span class="kn-channel-badge" :class="row.channel.toLowerCase()">
+                {{ formatChannel(row.channel) }}
+              </span>
+            </div>
+            <div class="kn-mo-actions-top">
+              <button class="kn-action-btn print" title="Печать" @click="openPrintSheet(row)">
+                <Printer :size="14" :stroke-width="1.8" />
+              </button>
+              <button class="kn-action-btn edit" title="Мерки и детали" @click="openDrawerForEdit(row)">
+                <Pencil :size="14" :stroke-width="1.8" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Client Info -->
+          <div class="kn-mo-client-section">
+            <strong class="kn-client-name">{{ row.clientName }}</strong>
+            <div class="kn-mo-client-meta">
+              <span class="kn-client-tel">{{ row.clientPhone }}</span>
+              <span v-if="row.clientInstagram" class="kn-client-insta">
+                <Instagram :size="11" :stroke-width="1.8" />
+                <span>{{ row.clientInstagram }}</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Suit & Fabric Specs -->
+          <div class="kn-mo-suit-details">
+            <div class="kn-suit-title">
+              <strong>{{ row.productType }}</strong>
+              <span class="kn-order-type-tag">{{ row.orderType }}</span>
+            </div>
+            <div class="kn-suit-specs font-outfit">
+              <span>{{ row.fabricBrand }} • {{ row.fabricColor }}</span>
+              <span v-if="row.monogram" class="kn-monogram-pill">
+                «{{ row.monogram }}»
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Measurements Pill -->
+          <div class="kn-measurements-pill" @click="openDrawerForEdit(row)">
+            <Ruler :size="13" :stroke-width="1.8" class="kn-ruler-icon" />
+            <span v-if="row.height">Рост: {{ row.height }} | Гр: {{ row.chest }} | Т: {{ row.waist }}</span>
+            <span v-else class="kn-no-measurements">Нажмите для ввода мерок</span>
+          </div>
+
+          <!-- Status Dropdown & Price -->
+          <div class="kn-mo-status-fin-row">
+            <el-select
+              :model-value="row.status"
+              size="small"
+              class="kn-status-select-m"
+              @change="(val: string) => handleStatusChange(row.id, val)"
+            >
+              <el-option label="1. Новая заявка" value="LEAD" />
+              <el-option label="2. Запись на примерку" value="APPOINTMENT" />
+              <el-option label="3. Снятие мерок" value="FITTING" />
+              <el-option label="4. Предоплата 50%" value="PAYMENT_AGREED" />
+              <el-option label="5. В пошиве" value="TAILORING" />
+              <el-option label="6. Выдан клиенту" value="DELIVERED" />
+            </el-select>
+
+            <div class="kn-fin-col font-outfit kn-fin-m">
+              <span class="kn-total-price">{{ formatMoney(row.totalAmount) }} ₽</span>
+              <span v-if="row.balanceAmount > 0" class="kn-balance-due">
+                Долг: {{ formatMoney(row.balanceAmount) }} ₽
+              </span>
+              <span v-else class="kn-balance-paid">Оплачен 100%</span>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons: Payment & Delete -->
+          <div class="kn-mo-bottom-bar">
+            <button class="kn-mo-pay-btn" @click="openPaymentDialog(row)">
+              <CreditCard :size="13" :stroke-width="1.8" />
+              <span>Принять оплату / аванс</span>
+            </button>
+            <button class="kn-action-btn del" title="Удалить" @click="handleDelete(row.id)">
+              <Trash2 :size="13" :stroke-width="1.8" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Comprehensive Bespoke Suit Drawer -->
@@ -1296,6 +1396,111 @@ const formatChannel = (ch: string) => {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+}
+
+/* Mobile Luxury Orders Card List */
+.kn-mobile-orders-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kn-empty-orders {
+  padding: 30px;
+  text-align: center;
+  color: var(--kn-text-muted);
+  font-size: 13px;
+}
+
+.kn-m-order-fullcard {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kn-mo-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kn-mo-actions-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kn-mo-client-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kn-mo-client-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--kn-text-muted);
+}
+
+.kn-mo-suit-details {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.kn-mo-status-fin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.kn-status-select-m {
+  width: 165px !important;
+}
+
+.kn-fin-m {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.kn-mo-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kn-mo-pay-btn {
+  flex: 1;
+  height: 36px;
+  background: rgba(197, 160, 89, 0.14);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 8px;
+  color: var(--kn-gold-light);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:active {
+    background: var(--kn-gold-gradient);
+    color: #0A0B0E;
   }
 }
 </style>

@@ -93,7 +93,8 @@
 
     <!-- Inventory Table -->
     <div class="kn-card kn-table-card">
-      <el-table :data="filteredInventory" style="width: 100%" v-loading="loading">
+      <!-- Desktop Table -->
+      <el-table v-if="!isMobile" :data="filteredInventory" style="width: 100%" v-loading="loading">
         <el-table-column prop="sku" label="Артикул / SKU" width="160">
           <template #default="{ row }">
             <span class="kn-sku-code font-outfit">{{ row.sku }}</span>
@@ -157,6 +158,38 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- Mobile Luxury Cards View -->
+      <div v-else class="kn-mobile-inventory-list" v-loading="loading">
+        <div v-for="row in filteredInventory" :key="row.id" class="kn-card kn-m-inv-card">
+          <div class="kn-m-inv-top">
+            <span class="kn-sku-code font-outfit">{{ row.sku }}</span>
+            <span class="kn-stock-val font-outfit" :class="{ 'low-stock': row.stockQuantity <= row.minThreshold }">
+              {{ row.stockQuantity }} {{ row.unit }}
+            </span>
+          </div>
+
+          <div class="kn-m-inv-body">
+            <strong class="kn-m-inv-name">{{ row.name }}</strong>
+            <div class="kn-m-inv-meta">
+              <span class="kn-color-sub">{{ row.color }}</span>
+              <span v-if="row.size" class="kn-size-tag font-outfit">Р-р {{ row.size }} ({{ row.heightCategory }})</span>
+              <span v-else class="kn-fabric-tag">В рулонах</span>
+            </div>
+          </div>
+
+          <div class="kn-m-inv-footer">
+            <strong class="kn-price font-outfit">{{ formatMoney(row.price) }} ₽</strong>
+            <div class="kn-counter-btns">
+              <button class="kn-counter-btn" @click="changeStock(row.id, -1)">-</button>
+              <button class="kn-counter-btn plus" @click="changeStock(row.id, 1)">+</button>
+              <button class="kn-del-btn" @click="deleteItem(row.id)" title="Удалить">
+                <Trash2 :size="14" :stroke-width="1.8" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Create / Edit Modal -->
@@ -257,7 +290,7 @@ import {
   Trash2
 } from 'lucide-vue-next';
 
-const { modalWidth } = useResponsive();
+const { modalWidth, isMobile } = useResponsive();
 
 const loading = ref(false);
 const inventory = ref<any[]>([]);
@@ -601,10 +634,93 @@ const formatMoney = (val: number) => {
   }
 }
 
+/* Mobile Inventory Cards */
+.kn-mobile-inventory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kn-m-inv-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(197, 160, 89, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kn-m-inv-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kn-m-inv-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kn-m-inv-name {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.kn-m-inv-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.kn-size-tag {
+  background: rgba(197, 160, 89, 0.12);
+  color: #DFBE7A;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.kn-m-inv-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
 @media (max-width: 768px) {
+  .kn-page-title {
+    font-size: 20px;
+  }
+
+  .kn-page-subtitle {
+    font-size: 11px;
+  }
+
+  /* 2-Column KPI grid on mobile */
   .kn-inv-kpis {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .kn-inv-kpi {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  .kn-inv-kpi.alert {
+    grid-column: span 2;
+  }
+
+  .kn-kpi-lbl {
+    font-size: 11px;
+  }
+
+  .kn-kpi-num {
+    font-size: 18px;
   }
 
   .kn-type-tabs {
