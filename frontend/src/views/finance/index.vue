@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <!-- 2. Horizontal Navigation Tabs (Swipe-friendly on mobile) -->
+    <!-- 2. Navigation Tabs (Responsive Segmented Layout) -->
     <div class="kn-finance-nav-wrap">
       <div class="kn-finance-nav">
         <button
@@ -63,8 +63,8 @@
           :class="{ active: activeTab === 'pnl' }"
           @click="activeTab = 'pnl'"
         >
-          <TrendingUp :size="16" />
-          <span>Сводка P&L и Прибыль</span>
+          <TrendingUp :size="15" />
+          <span>Сводка P&L</span>
         </button>
 
         <button
@@ -72,9 +72,9 @@
           :class="{ active: activeTab === 'channels' }"
           @click="activeTab = 'channels'"
         >
-          <Share2 :size="16" />
-          <span>Каналы Лидов (IG • WA • TG)</span>
-          <span class="kn-tab-badge">Новое</span>
+          <Share2 :size="15" />
+          <span>Каналы Лидов</span>
+          <span class="kn-tab-badge">IG • WA</span>
         </button>
 
         <button
@@ -82,8 +82,8 @@
           :class="{ active: activeTab === 'cash' }"
           @click="activeTab = 'cash'"
         >
-          <Receipt :size="16" />
-          <span>Касса и ДДС</span>
+          <Receipt :size="15" />
+          <span>Касса & ДДС</span>
         </button>
 
         <button
@@ -91,8 +91,8 @@
           :class="{ active: activeTab === 'purchases' }"
           @click="activeTab = 'purchases'"
         >
-          <Package :size="16" />
-          <span>Закупки Тканей (COGS)</span>
+          <Package :size="15" />
+          <span>Закупки Тканей</span>
         </button>
 
         <button
@@ -100,7 +100,7 @@
           :class="{ active: activeTab === 'economics' }"
           @click="activeTab = 'economics'"
         >
-          <Percent :size="16" />
+          <Percent :size="15" />
           <span>Юнит-Маржа Заказов</span>
         </button>
       </div>
@@ -125,19 +125,19 @@
 
         <div class="kn-card kn-kpi-card">
           <div class="kn-kpi-header">
-            <span class="kn-kpi-title">Закупки Тканей (COGS)</span>
-            <span class="kn-kpi-badge warning">Материалы</span>
+            <span class="kn-kpi-title">Закупки Тканей</span>
+            <span class="kn-kpi-badge warning">COGS</span>
           </div>
           <div class="kn-kpi-val font-outfit">
             {{ formatMoney(overview.totalCogs || 3840000) }} <span class="kn-rub">₽</span>
           </div>
-          <div class="kn-kpi-sub">Рулоны Loro Piana, VBC, Scabal</div>
+          <div class="kn-kpi-sub">Loro Piana, VBC, Scabal</div>
         </div>
 
         <div class="kn-card kn-kpi-card">
           <div class="kn-kpi-header">
-            <span class="kn-kpi-title">Операционные Расходы (OPEX)</span>
-            <span class="kn-kpi-badge info">Салон & Пошив</span>
+            <span class="kn-kpi-title">Расходы (OPEX)</span>
+            <span class="kn-kpi-badge info">Салон</span>
           </div>
           <div class="kn-kpi-val font-outfit">
             {{ formatMoney(overview.totalOpex || 2150000) }} <span class="kn-rub">₽</span>
@@ -148,12 +148,12 @@
         <div class="kn-card kn-kpi-card profit-card">
           <div class="kn-kpi-header">
             <span class="kn-kpi-title">Чистая Прибыль</span>
-            <span class="kn-kpi-badge gold">Маржа {{ overview.netMarginPercent || 44.9 }}%</span>
+            <span class="kn-kpi-badge gold">{{ overview.netMarginPercent || 44.9 }}% маржа</span>
           </div>
           <div class="kn-kpi-val font-outfit profit-val">
             +{{ formatMoney(overview.netProfit || 4880000) }} <span class="kn-rub">₽</span>
           </div>
-          <div class="kn-kpi-sub">Прибыль модного дома KINGSNAME</div>
+          <div class="kn-kpi-sub">Прибыль дома KINGSNAME</div>
         </div>
       </div>
 
@@ -1147,6 +1147,9 @@ const formatMoney = (val: number) => {
   flex-direction: column;
   gap: 20px;
   animation: fadeIn 0.35s ease;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 @keyframes fadeIn {
@@ -1808,6 +1811,10 @@ const formatMoney = (val: number) => {
 }
 
 @media (max-width: 768px) {
+  .kn-card {
+    padding: 14px 12px;
+  }
+
   .kn-capital-banner {
     padding: 16px 14px;
   }
@@ -1842,13 +1849,98 @@ const formatMoney = (val: number) => {
     gap: 8px;
   }
 
+  /* Responsive Segmented Tabs - No cut off */
+  .kn-finance-nav-wrap {
+    overflow: visible;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .kn-finance-nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kn-finance-tab {
+    width: 100%;
+    padding: 10px 8px;
+    font-size: 12px;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+    border-radius: 8px;
+  }
+
+  .kn-finance-tab:last-child {
+    grid-column: span 2;
+  }
+
+  /* 4 KPI Cards - Perfectly Fitted */
   .kn-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .kn-kpi-card {
+    padding: 14px 12px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .kn-kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 6px;
+    min-width: 0;
+  }
+
+  .kn-kpi-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--kn-text-muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kn-kpi-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .kn-kpi-val {
-    font-size: 20px;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .kn-rub {
+      font-size: 14px;
+    }
+  }
+
+  .kn-kpi-sub {
+    font-size: 10.5px;
+    line-height: 1.25;
+    color: var(--kn-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .kn-echarts-box {
@@ -1858,6 +1950,19 @@ const formatMoney = (val: number) => {
   .kn-channel-metrics-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+}
+
+@media (max-width: 440px) {
+  .kn-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .kn-kpi-card {
+    padding: 14px 14px;
+  }
+  .kn-kpi-val {
+    font-size: 22px;
   }
 }
 </style>
