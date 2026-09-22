@@ -1010,7 +1010,7 @@ onUnmounted(() => {
   font-size: 11px;
   font-weight: 700;
   color: var(--kn-gold-primary);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Jura', sans-serif;
 }
 
 .kn-stage-icon {

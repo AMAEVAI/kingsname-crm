@@ -1340,7 +1340,7 @@ const initExpenseChart = () => {
         color: '#FFFFFF',
         fontSize: isMobile.value ? 15 : 17,
         fontWeight: 'bold',
-        fontFamily: 'Outfit, sans-serif'
+        fontFamily: 'Jura, sans-serif'
       },
       subtextStyle: {
         color: '#A1A1AA',
@@ -1407,7 +1407,7 @@ const initChannelPieChart = () => {
         color: '#FFFFFF',
         fontSize: isMobile.value ? 16 : 18,
         fontWeight: 'bold',
-        fontFamily: 'Outfit, sans-serif'
+        fontFamily: 'Jura, sans-serif'
       },
       subtextStyle: {
         color: '#A1A1AA',

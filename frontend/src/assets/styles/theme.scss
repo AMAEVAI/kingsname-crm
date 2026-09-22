@@ -62,19 +62,24 @@
 body {
   background-color: var(--kn-bg-primary);
   color: var(--kn-text-white);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Jura', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Luxury Brand Typography */
 .font-brand {
-  font-family: 'Cinzel', serif;
+  font-family: 'Cinzel', 'Jura', serif;
   letter-spacing: 0.08em;
 }
 
-.font-outfit {
-  font-family: 'Outfit', sans-serif;
+.font-outfit,
+.font-jura {
+  font-family: 'Jura', sans-serif;
+}
+
+button, input, select, textarea, .el-button, .el-input, .el-table, .el-dialog, .el-drawer, .el-dropdown, .el-tag, .el-radio, .el-select, .el-form-item__label, .el-menu-item {
+  font-family: 'Jura', sans-serif !important;
 }
 
 /* Custom Scrollbar */
@@ -151,7 +156,7 @@ body {
   background-color: rgba(255, 255, 255, 0.03) !important;
   color: #C5A059 !important;
   font-weight: 600 !important;
-  font-family: 'Outfit', sans-serif !important;
+  font-family: 'Jura', sans-serif !important;
   border-bottom: 1px solid var(--kn-gold-border-subtle) !important;
 }
 
