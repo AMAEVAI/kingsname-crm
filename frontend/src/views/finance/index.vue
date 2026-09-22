@@ -196,14 +196,67 @@
           <div ref="pnlChartRef" class="kn-echarts-box"></div>
         </div>
 
-        <div class="kn-card kn-chart-card">
+        <div class="kn-card kn-chart-card kn-expense-structure-card">
           <div class="kn-chart-header">
             <div>
               <h3 class="kn-chart-title font-brand">Структура Затрат Дома</h3>
-              <p class="kn-chart-sub">Доли себестоимости и обслуживания</p>
+              <p class="kn-chart-sub">Доли себестоимости и обслуживания дома</p>
+            </div>
+            <div class="kn-chart-total-pill font-outfit">
+              Всего: {{ formatMoney(totalExpenses) }} ₽
             </div>
           </div>
-          <div ref="expenseChartRef" class="kn-echarts-box"></div>
+
+          <!-- Multi-Segment Visual Stacked Progress Bar (100% обзор расходов) -->
+          <div class="kn-expense-visual-bar-wrap">
+            <div class="kn-expense-stacked-bar">
+              <div 
+                v-for="item in expenseCategories" 
+                :key="item.name"
+                class="kn-expense-bar-segment"
+                :style="{ width: `${item.value}%`, background: item.color }"
+                :title="`${item.shortName}: ${item.value}%`"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Centered Donut with Dynamic Total Center Text -->
+          <div class="kn-donut-container">
+            <div ref="expenseChartRef" class="kn-echarts-donut kn-expense-donut"></div>
+          </div>
+
+          <!-- Luxury Detailed Expense Breakdown List (Понятные карточки затрат) -->
+          <div class="kn-expense-breakdown-list">
+            <div 
+              v-for="item in expenseCategories" 
+              :key="item.name"
+              class="kn-expense-row-card"
+            >
+              <div class="kn-expense-row-top">
+                <div class="kn-expense-name-wrap">
+                  <span class="kn-expense-dot" :style="{ background: item.color, boxShadow: `0 0 8px ${item.color}88` }"></span>
+                  <div>
+                    <span class="kn-expense-title">{{ item.name }}</span>
+                    <span class="kn-expense-desc">{{ item.desc }}</span>
+                  </div>
+                </div>
+                <div class="kn-expense-numbers font-outfit">
+                  <strong class="kn-expense-amount">{{ formatMoney(item.amount) }} ₽</strong>
+                  <span class="kn-expense-pct-badge" :style="{ color: item.color, background: `${item.color}1f`, borderColor: `${item.color}40` }">
+                    {{ item.value }}%
+                  </span>
+                </div>
+              </div>
+
+              <!-- Animated Progress Track for each category -->
+              <div class="kn-expense-track">
+                <div 
+                  class="kn-expense-fill"
+                  :style="{ width: `${item.value}%`, background: item.gradient, boxShadow: `0 0 8px ${item.color}55` }"
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -891,6 +944,71 @@ const formatChannelShort = (chKey: string) => {
   }
 };
 
+const totalExpenses = computed(() => {
+  const cogs = overview.value.totalCogs || 3500000;
+  const opex = overview.value.totalOpex || 1000000;
+  return cogs + opex;
+});
+
+const getExpenseAmount = (percent: number) => {
+  return Math.round((totalExpenses.value * percent) / 100);
+};
+
+const expenseCategories = computed(() => {
+  const raw = overview.value.expenseStructure || [
+    { name: 'Ткани и материалы (Loro Piana, VBC, Scabal)', value: 52 },
+    { name: 'Работа мастеров-портных', value: 26 },
+    { name: 'Аренда флагманского салона', value: 12 },
+    { name: 'Фирменная упаковка и кофры', value: 5 },
+    { name: 'Маркетинг и реклама', value: 5 }
+  ];
+
+  const meta = [
+    {
+      shortName: 'Ткани и материалы',
+      desc: 'Итальянская и британская шерсть Super 150s–180s',
+      color: '#C5A059',
+      gradient: 'linear-gradient(90deg, #C5A059, #E5C378)'
+    },
+    {
+      shortName: 'Работа мастеров',
+      desc: 'Индивидуальный ручной раскрой, бортовка и вспушка',
+      color: '#10B981',
+      gradient: 'linear-gradient(90deg, #10B981, #34D399)'
+    },
+    {
+      shortName: 'Аренда салона',
+      desc: 'Салон KINGSNAME Haute Sartorial и VIP-примерочные',
+      color: '#3B82F6',
+      gradient: 'linear-gradient(90deg, #3B82F6, #60A5FA)'
+    },
+    {
+      shortName: 'Упаковка и кофры',
+      desc: 'Деревянные вешалки, дышащие чехлы и шелковая бумага',
+      color: '#8B5CF6',
+      gradient: 'linear-gradient(90deg, #8B5CF6, #A78BFA)'
+    },
+    {
+      shortName: 'Маркетинг & PR',
+      desc: 'Съемки лукбуков, VIP-приемы и реклама в каналах',
+      color: '#F59E0B',
+      gradient: 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+    }
+  ];
+
+  return raw.map((item: any, i: number) => {
+    const m = meta[i] || meta[0];
+    return {
+      ...item,
+      shortName: m.shortName,
+      desc: m.desc,
+      color: m.color,
+      gradient: m.gradient,
+      amount: getExpenseAmount(item.value)
+    };
+  });
+});
+
 const txTypeFilter = ref('');
 
 // Navigation Scroll Slider State
@@ -1195,37 +1313,60 @@ const initExpenseChart = () => {
   if (!expenseChartRef.value) return;
   expenseChartInstance.value = expenseChartInstance.value || echarts.getInstanceByDom(expenseChartRef.value) || echarts.init(expenseChartRef.value);
 
-  const data = overview.value.expenseStructure || [
-    { name: 'Ткани и материалы', value: 52 },
-    { name: 'Работа мастеров', value: 26 },
-    { name: 'Аренда салона', value: 12 },
-    { name: 'Упаковка и кофры', value: 5 },
-    { name: 'Маркетинг', value: 5 }
-  ];
+  const data = expenseCategories.value.map(item => ({
+    name: item.shortName,
+    value: item.value
+  }));
+
+  const total = totalExpenses.value;
 
   const option: echarts.EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
+      confine: true,
       backgroundColor: '#1A1A1E',
       borderColor: '#C5A059',
-      textStyle: { color: '#FFFFFF' }
+      borderWidth: 1,
+      textStyle: { color: '#FFFFFF', fontSize: 12 },
+      formatter: '{b}: <br/><b>{c}%</b> от общих затрат'
+    },
+    title: {
+      text: `${formatMoney(total)} ₽`,
+      subtext: 'Всего затрат',
+      left: 'center',
+      top: '38%',
+      textStyle: {
+        color: '#FFFFFF',
+        fontSize: isMobile.value ? 15 : 17,
+        fontWeight: 'bold',
+        fontFamily: 'Outfit, sans-serif'
+      },
+      subtextStyle: {
+        color: '#A1A1AA',
+        fontSize: 11
+      }
     },
     legend: {
-      orient: 'vertical',
-      right: '2%',
-      top: 'middle',
-      textStyle: { color: '#A1A1AA', fontSize: 10 },
-      show: !isMobile.value
+      show: false
     },
     series: [
       {
         name: 'Структура расходов',
         type: 'pie',
-        radius: ['45%', '70%'],
-        center: isMobile.value ? ['50%', '50%'] : ['40%', '50%'],
+        radius: ['54%', '76%'],
+        center: ['50%', '50%'],
         avoidLabelOverlap: false,
         label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 6,
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
         data,
         color: ['#C5A059', '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B']
       }
@@ -1233,6 +1374,7 @@ const initExpenseChart = () => {
   };
 
   expenseChartInstance.value.setOption(option);
+  expenseChartInstance.value.resize();
 };
 
 const initChannelPieChart = () => {
@@ -1746,6 +1888,140 @@ const formatMoney = (val: number) => {
 .kn-echarts-donut {
   width: 100%;
   height: 200px;
+}
+
+/* Expense Structure Card */
+.kn-expense-structure-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.kn-expense-visual-bar-wrap {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.kn-expense-stacked-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  display: flex;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.kn-expense-bar-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+  &:not(:last-child) {
+    border-right: 1px solid #0E0E10;
+  }
+}
+
+.kn-expense-donut {
+  height: 190px;
+}
+
+.kn-expense-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.kn-expense-row-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(197, 160, 89, 0.3);
+  }
+}
+
+.kn-expense-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.kn-expense-name-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.kn-expense-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.kn-expense-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1.3;
+}
+
+.kn-expense-desc {
+  display: block;
+  font-size: 11px;
+  color: var(--kn-text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.kn-expense-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.kn-expense-amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.kn-expense-pct-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.kn-expense-track {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.kn-expense-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Channel Legend List */
