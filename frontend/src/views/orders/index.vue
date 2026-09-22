@@ -35,8 +35,10 @@
         <el-select v-model="filterChannel" placeholder="Канал заявки" clearable @change="handleFilter">
           <el-option label="Все каналы" value="" />
           <el-option label="Instagram (@kingsname)" value="INSTAGRAM" />
+          <el-option label="WhatsApp (+7 928...)" value="WHATSAPP" />
+          <el-option label="Telegram (Канал & Чат)" value="TELEGRAM" />
+          <el-option label="Салон KINGSNAME (Грозный)" value="SALON" />
           <el-option label="Сайт (kingsname.store)" value="WEBSITE" />
-          <el-option label="Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
           <el-option label="Телефонный звонок" value="PHONE" />
         </el-select>
 
@@ -330,8 +332,10 @@
                     <el-form-item label="Канал привлечения">
                       <el-select v-model="form.channel" style="width: 100%">
                         <el-option label="Instagram Direct (@kingsname)" value="INSTAGRAM" />
+                        <el-option label="WhatsApp Салон (+7 928...)" value="WHATSAPP" />
+                        <el-option label="Telegram Канал & Чат" value="TELEGRAM" />
+                        <el-option label="Салон KINGSNAME (Грозный)" value="SALON" />
                         <el-option label="Официальный сайт (kingsname.store)" value="WEBSITE" />
-                        <el-option label="Салон KINGSNAME (Грозный)" value="SALON_GROZNY" />
                         <el-option label="Телефон" value="PHONE" />
                       </el-select>
                     </el-form-item>
@@ -941,8 +945,11 @@ const formatMoney = (val: number) => {
 
 const formatChannel = (ch: string) => {
   switch (ch) {
-    case 'INSTAGRAM': return '@kingsname';
+    case 'INSTAGRAM': return 'Instagram';
+    case 'WHATSAPP': return 'WhatsApp';
+    case 'TELEGRAM': return 'Telegram';
     case 'WEBSITE': return 'Сайт';
+    case 'SALON':
     case 'SALON_GROZNY': return 'Салон Грозный';
     case 'PHONE': return 'Телефон';
     default: return ch;

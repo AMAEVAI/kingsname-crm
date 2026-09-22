@@ -732,7 +732,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, shallowRef } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, shallowRef, watch } from 'vue';
 import { api } from '@/utils/request';
 import { useResponsive } from '@/utils/useResponsive';
 import { ElMessage } from 'element-plus';
@@ -836,10 +836,19 @@ const loadAllData = async () => {
     cashTransactions.value = txs.list || [];
     purchases.value = purch.list || [];
     orderEconomics.value = eco.list || [];
+
+    await nextTick();
+    initCharts();
   } catch (err) {
     console.error('Error loading finance data:', err);
   }
 };
+
+watch(activeTab, async () => {
+  await nextTick();
+  handleResize();
+  initCharts();
+});
 
 const loadCashTransactions = async () => {
   const res = await api.getCashTransactions({ type: txTypeFilter.value || undefined });
@@ -907,7 +916,7 @@ const initCharts = () => {
 
 const initPnlChart = () => {
   if (!pnlChartRef.value) return;
-  pnlChartInstance.value = echarts.init(pnlChartRef.value);
+  pnlChartInstance.value = pnlChartInstance.value || echarts.getInstanceByDom(pnlChartRef.value) || echarts.init(pnlChartRef.value);
 
   const months = overview.value.pnlTrend?.months || ['Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен'];
   const rev = overview.value.pnlTrend?.revenue || [1200000, 1450000, 1680000, 1920000, 2150000, 2470000];
@@ -987,7 +996,7 @@ const initPnlChart = () => {
 
 const initExpenseChart = () => {
   if (!expenseChartRef.value) return;
-  expenseChartInstance.value = echarts.init(expenseChartRef.value);
+  expenseChartInstance.value = expenseChartInstance.value || echarts.getInstanceByDom(expenseChartRef.value) || echarts.init(expenseChartRef.value);
 
   const data = overview.value.expenseStructure || [
     { name: 'Ткани и материалы', value: 52 },
@@ -1031,7 +1040,7 @@ const initExpenseChart = () => {
 
 const initChannelPieChart = () => {
   if (!channelPieChartRef.value) return;
-  channelPieChartInstance.value = echarts.init(channelPieChartRef.value);
+  channelPieChartInstance.value = channelPieChartInstance.value || echarts.getInstanceByDom(channelPieChartRef.value) || echarts.init(channelPieChartRef.value);
 
   const data = channelAnalytics.value.map(c => ({
     name: c.label,
@@ -1069,7 +1078,7 @@ const initChannelPieChart = () => {
 
 const initChannelBarChart = () => {
   if (!channelBarChartRef.value) return;
-  channelBarChartInstance.value = echarts.init(channelBarChartRef.value);
+  channelBarChartInstance.value = channelBarChartInstance.value || echarts.getInstanceByDom(channelBarChartRef.value) || echarts.init(channelBarChartRef.value);
 
   const labels = channelAnalytics.value.map(c => c.label.split(' ')[0]);
   const conversions = channelAnalytics.value.map(c => c.conversionToOrder);

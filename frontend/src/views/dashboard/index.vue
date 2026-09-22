@@ -325,10 +325,19 @@
       </div>
     </div>
 
-    <!-- Quick Lead Modal (Instagram @kingsname) -->
-    <el-dialog v-model="quickLeadVisible" title="Новая Заявка из Instagram @kingsname" :width="modalWidth">
+    <!-- Quick Lead Modal (Multi-Channel) -->
+    <el-dialog v-model="quickLeadVisible" title="Быстрая фиксация заявки (Лида)" :width="modalWidth">
       <el-form :model="leadForm" label-position="top">
-        <el-form-item label="Instagram аккаунт клиента">
+        <el-form-item label="Канал обращения">
+          <el-select v-model="leadForm.channel" style="width: 100%">
+            <el-option label="Instagram (@kingsname)" value="INSTAGRAM" />
+            <el-option label="WhatsApp Салон (+7 928...)" value="WHATSAPP" />
+            <el-option label="Telegram Канал & Чат" value="TELEGRAM" />
+            <el-option label="Салон KINGSNAME (Грозный)" value="SALON" />
+            <el-option label="Сайт (kingsname.store)" value="WEBSITE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="leadForm.channel === 'INSTAGRAM'" label="Instagram аккаунт клиента">
           <el-input v-model="leadForm.instagram" placeholder="@username" />
         </el-form-item>
         <el-form-item label="ФИО клиента">
@@ -424,6 +433,7 @@ const quickLeadVisible = ref(false);
 const appointmentVisible = ref(false);
 
 const leadForm = ref({
+  channel: 'INSTAGRAM',
   instagram: '',
   name: '',
   phone: '',
@@ -598,6 +608,7 @@ const getStatusTagType = (status: string) => {
 
 const openQuickLeadModal = () => {
   leadForm.value = {
+    channel: 'INSTAGRAM',
     instagram: '',
     name: '',
     phone: '',
@@ -615,13 +626,13 @@ const saveQuickLead = async () => {
   await api.saveOrder({
     clientName: leadForm.value.name,
     clientPhone: leadForm.value.phone,
-    channel: 'INSTAGRAM',
+    channel: leadForm.value.channel || 'INSTAGRAM',
     productType: leadForm.value.productType,
     orderType: 'BESPOKE',
     status: 'LEAD',
     totalAmount: 150000,
     depositAmount: 0,
-    tailorNotes: `Лид из @kingsname (${leadForm.value.instagram}): ${leadForm.value.tailorNotes}`,
+    tailorNotes: `Лид (${leadForm.value.channel}${leadForm.value.instagram ? ' ' + leadForm.value.instagram : ''}): ${leadForm.value.tailorNotes}`,
   });
 
   quickLeadVisible.value = false;
