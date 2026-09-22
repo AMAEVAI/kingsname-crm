@@ -9,7 +9,7 @@
     <aside class="kn-sidebar" :class="{ 'mobile-open': mobileMenuOpen }">
       <!-- Brand Logo Header -->
       <div class="kn-sidebar-brand">
-        <div class="kn-emblem">
+        <div class="kn-emblem kn-logo-clickable" @click="goToDashboard" title="На главную">
           <svg viewBox="0 0 24 24" class="kn-crown-icon">
             <path fill="url(#goldGrad)" d="M2 19h20v2H2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2z"/>
             <defs>
@@ -21,7 +21,7 @@
             </defs>
           </svg>
         </div>
-        <div class="kn-brand-texts">
+        <div class="kn-brand-texts kn-logo-clickable" @click="goToDashboard" title="На главную">
           <h1 class="kn-brand-title font-brand">KINGSNAME</h1>
           <p class="kn-brand-sub">GROZNY • BESPOKE TAILORING</p>
         </div>
@@ -105,7 +105,7 @@
           </button>
 
           <!-- Luxury Brand Title with Vector Gold Crown -->
-          <div class="kn-mobile-brand">
+          <div class="kn-mobile-brand kn-logo-clickable" @click="goToDashboard" title="На главную">
             <div class="kn-mobile-crown">
               <svg viewBox="0 0 24 24" class="kn-crown-icon-mini">
                 <path fill="url(#goldGradMini)" d="M2 19h20v2H2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2z"/>
@@ -190,6 +190,11 @@ const mobileMenuOpen = ref(false);
 watch(() => route.fullPath, () => {
   mobileMenuOpen.value = false;
 });
+
+const goToDashboard = () => {
+  mobileMenuOpen.value = false;
+  window.location.href = '/dashboard';
+};
 
 const handleLogout = () => {
   ElMessageBox.confirm('Завершить текущую рабочую смену?', 'Выход из CRM KINGSNAME', {
@@ -508,6 +513,15 @@ const handleLogout = () => {
     background: rgba(197, 160, 89, 0.15);
     border-color: var(--kn-gold-primary);
     color: #FFFFFF;
+  }
+}
+
+.kn-logo-clickable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.85;
   }
 }
 
