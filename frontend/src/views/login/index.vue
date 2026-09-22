@@ -148,6 +148,87 @@ import {
 const router = useRouter();
 const userStore = useUserStore();
 
+// ─── iPhone-style tap sound via Web Audio API ───────────────────────────────
+let _audioCtx: AudioContext | null = null;
+const getAudioCtx = () => {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  return _audioCtx;
+};
+
+const playTap = (type: 'key' | 'delete' | 'error' = 'key') => {
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+
+    if (type === 'key') {
+      // Short noise click — classic iPhone keyboard tick
+      const bufferSize = ctx.sampleRate * 0.04; // 40ms
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.08));
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 3200;
+      filter.Q.value = 0.8;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(now);
+
+    } else if (type === 'delete') {
+      // Slightly lower pitched for backspace
+      const bufferSize = ctx.sampleRate * 0.035;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.1));
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1800;
+      filter.Q.value = 1.2;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(now);
+
+    } else if (type === 'error') {
+      // Short double-buzz for wrong code
+      [0, 0.08].forEach((offset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 180;
+        gain.gain.setValueAtTime(0.18, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.06);
+      });
+    }
+  } catch (_) { /* silent fail if audio not supported */ }
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 const digits = ref<string[]>(['', '', '', '', '', '', '', '']);
 const inputRefs = ref<HTMLInputElement[]>([]);
 const focusedIndex = ref(0);
@@ -220,6 +301,7 @@ const handlePaste = (e: ClipboardEvent) => {
 };
 
 const pressKey = (key: string) => {
+  playTap('key');
   const emptyIndex = digits.value.findIndex((d) => d === '');
   if (emptyIndex !== -1) {
     digits.value[emptyIndex] = key;
@@ -232,6 +314,7 @@ const pressKey = (key: string) => {
 };
 
 const backspace = () => {
+  playTap('delete');
   for (let i = 7; i >= 0; i--) {
     if (digits.value[i] !== '') {
       digits.value[i] = '';
@@ -242,6 +325,7 @@ const backspace = () => {
 };
 
 const clearAll = () => {
+  playTap('delete');
   digits.value = ['', '', '', '', '', '', '', ''];
   errorMessage.value = '';
   inputRefs.value[0]?.focus();
@@ -280,6 +364,7 @@ const submitLogin = async () => {
 };
 
 const triggerShake = () => {
+  playTap('error');
   shakeError.value = true;
   setTimeout(() => {
     shakeError.value = false;
