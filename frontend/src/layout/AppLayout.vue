@@ -392,6 +392,9 @@ const handleLogout = () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Topbar */
@@ -493,6 +496,8 @@ const handleLogout = () => {
   padding: 32px;
   background-color: var(--kn-bg-primary);
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Mobile Toggle & Brand in Topbar */
@@ -694,12 +699,21 @@ const handleLogout = () => {
 
 @media (max-width: 768px) {
   .kn-topbar {
-    padding: 0 14px;
-    height: 60px;
+    padding: 0 12px;
+    height: 58px;
   }
 
   .kn-topbar-left {
     gap: 10px;
+  }
+
+  .kn-mobile-toggle-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .kn-mobile-brand-title {
+    font-size: 15px;
   }
 
   .kn-mobile-brand-sub {
@@ -707,7 +721,7 @@ const handleLogout = () => {
   }
 
   .kn-topbar-right {
-    gap: 10px;
+    gap: 8px;
   }
 
   .kn-user-pill {
@@ -715,12 +729,18 @@ const handleLogout = () => {
     gap: 6px;
   }
 
+  .kn-user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
   .kn-user-info {
     display: none;
   }
 
   .kn-logout-btn {
-    padding: 6px 10px;
+    padding: 6px 8px;
   }
 
   .kn-logout-text {
@@ -728,7 +748,18 @@ const handleLogout = () => {
   }
 
   .kn-content {
-    padding: 16px 12px;
+    padding: 14px 12px;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .kn-topbar {
+    padding: 0 8px;
+  }
+
+  .kn-content {
+    padding: 12px 8px;
   }
 }
 </style>

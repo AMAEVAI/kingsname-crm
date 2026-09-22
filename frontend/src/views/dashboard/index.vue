@@ -13,7 +13,7 @@
       <div class="kn-dash-actions">
         <button class="kn-btn-action insta" @click="openQuickLeadModal">
           <Instagram :size="16" :stroke-width="1.8" class="kn-btn-icon" />
-          <span>+ Лид из @kingsname</span>
+          <span>+ Лид @kingsname</span>
         </button>
         <button class="kn-btn-action appoint" @click="openAppointmentModal">
           <CalendarPlus :size="16" :stroke-width="1.8" class="kn-btn-icon" />
@@ -554,20 +554,20 @@ const handleStageClick = (stageKey: string) => {
 
 const scrollFunnel = (direction: number) => {
   if (!funnelRef.value) return;
-  const step = 215; // 205px card + 10px gap
+  const step = 225; // 215px card + 10px gap
   funnelRef.value.scrollBy({ left: direction * step, behavior: 'smooth' });
 };
 
 const scrollToStageIndex = (idx: number) => {
   if (!funnelRef.value) return;
-  const step = 215;
+  const step = 225;
   funnelRef.value.scrollTo({ left: idx * step, behavior: 'smooth' });
   currentFunnelIndex.value = idx;
 };
 
 const onFunnelScroll = () => {
   if (!funnelRef.value) return;
-  const step = 215;
+  const step = 225;
   const idx = Math.round(funnelRef.value.scrollLeft / step);
   currentFunnelIndex.value = Math.max(0, Math.min(funnelStages.length - 1, idx));
 };
@@ -797,6 +797,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 28px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .kn-dash-header {
@@ -1355,15 +1358,16 @@ onUnmounted(() => {
 
 @media (max-width: 1024px) {
   .kn-dash-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     gap: 16px;
+    width: 100%;
   }
 
   .kn-dash-actions {
+    width: 100%;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   .kn-kpi-grid {
@@ -1388,25 +1392,32 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .kn-dashboard {
-    gap: 18px;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
   }
 
   .kn-dash-header {
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
+    width: 100%;
   }
 
   .kn-dash-title {
-    font-size: 19px;
+    font-size: 20px;
     letter-spacing: 0.02em;
     line-height: 1.25;
+    margin-bottom: 4px;
   }
 
   .kn-dash-subtitle {
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--kn-text-secondary);
   }
 
-  /* Compact 2-column actions: primary bespoke on top, 2 secondary side-by-side */
+  /* Full-width responsive action stack: primary bespoke on top, 2 secondary side-by-side */
   .kn-dash-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1417,21 +1428,31 @@ onUnmounted(() => {
   .kn-btn-action.bespoke {
     grid-column: span 2;
     order: -1;
-    height: 42px;
-    font-size: 13px;
+    height: 44px;
+    font-size: 13.5px;
     justify-content: center;
     border-radius: 8px;
+    padding: 0 16px;
   }
 
   .kn-btn-action.insta,
   .kn-btn-action.appoint {
-    height: 36px;
-    font-size: 11px;
+    height: 38px;
+    font-size: 11.5px;
     padding: 0 8px;
     justify-content: center;
     border-radius: 8px;
     gap: 6px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   /* 2-Column Luxury Compact KPI Grid */
@@ -1439,6 +1460,7 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+    width: 100%;
   }
 
   /* Hero Card: Total Month Revenue */
@@ -1459,32 +1481,51 @@ onUnmounted(() => {
     padding: 12px 12px;
     min-height: auto;
     border-radius: 10px;
+    overflow: hidden;
   }
 
   .kn-kpi-header {
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
   }
 
   .kn-kpi-title {
     font-size: 11px;
     line-height: 1.2;
     color: var(--kn-text-secondary);
+    min-width: 0;
+  }
+
+  .kn-kpi-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 2px 6px;
   }
 
   .kn-kpi-value {
     font-size: 18px;
+    font-weight: 700;
     margin-bottom: 2px;
   }
 
   .kn-kpi-sub {
     font-size: 10px;
-    opacity: 0.8;
+    opacity: 0.85;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* Horizontal Swipe Funnel Pipeline (Replaces 6 giant stacked bricks) */
+  /* Horizontal Swipe Funnel Pipeline */
   .kn-funnel-section {
     padding: 16px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .kn-section-header {
@@ -1492,22 +1533,45 @@ onUnmounted(() => {
     align-items: flex-start;
     gap: 8px;
     margin-bottom: 12px;
+    width: 100%;
+  }
+
+  .kn-funnel-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
   }
 
   .kn-section-title {
     font-size: 16px;
+    line-height: 1.3;
+    margin-bottom: 0;
   }
 
   .kn-section-sub {
     font-size: 11px;
     line-height: 1.35;
+    color: var(--kn-text-muted);
+  }
+
+  .kn-swipe-hint-btn {
+    flex-shrink: 0;
+    font-size: 10.5px;
+    padding: 3px 8px;
   }
 
   .kn-view-all-orders-btn {
     width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 10px 14px;
     font-size: 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
   }
 
   .kn-funnel-steps {
@@ -1515,11 +1579,9 @@ onUnmounted(() => {
     overflow-x: auto;
     overflow-y: hidden;
     gap: 10px;
-    padding: 6px 4px 12px 4px;
-    margin: 0 -2px;
+    padding: 6px 2px 14px 2px;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
     scrollbar-width: none;
     cursor: grab;
     user-select: none;
@@ -1537,13 +1599,12 @@ onUnmounted(() => {
   }
 
   .kn-funnel-card {
-    flex: 0 0 205px;
-    width: 205px;
-    min-height: 110px;
-    padding: 12px;
+    flex: 0 0 215px;
+    width: 215px;
+    min-height: 112px;
+    padding: 14px 12px;
     scroll-snap-align: start;
     border-radius: 10px;
-    touch-action: pan-x;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -1570,19 +1631,179 @@ onUnmounted(() => {
     font-size: 11px;
   }
 
+  .kn-funnel-stepper-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 8px;
+    padding-top: 4px;
+  }
+
+  .kn-stepper-arrow-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+  }
+
+  .kn-stepper-dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .kn-stepper-dot {
+    padding: 6px;
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* Charts Container on Mobile */
+  .kn-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+
   .kn-chart-card {
     padding: 14px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .kn-chart-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .kn-chart-title {
+    font-size: 15px;
+  }
+
+  .kn-chart-legend-label {
+    font-size: 10.5px;
+    color: var(--kn-text-muted);
   }
 
   .kn-echarts-container {
-    height: 280px;
+    height: 260px;
+    width: 100%;
   }
 
   .kn-recent-orders-card {
     padding: 14px 12px;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .kn-recent-orders-card .kn-section-header {
+    margin-bottom: 12px;
+
+    .el-button {
+      width: 100%;
+      height: 38px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      background: rgba(197, 160, 89, 0.12);
+      border: 1px solid rgba(197, 160, 89, 0.35);
+      color: #DFBE7A;
+      margin-left: 0;
+
+      &:hover, &:active {
+        background: rgba(197, 160, 89, 0.25);
+        border-color: var(--kn-gold-primary);
+        color: #FFFFFF;
+      }
+    }
+  }
+
+  .kn-mobile-orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .kn-mobile-order-card {
+    padding: 14px 14px;
     border-radius: 10px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(197, 160, 89, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      background: rgba(197, 160, 89, 0.1);
+      border-color: var(--kn-gold-primary);
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .kn-dash-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .kn-btn-action.bespoke {
+    grid-column: span 1;
+  }
+
+  .kn-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kn-kpi-card:first-child {
+    grid-column: span 1;
+  }
+
+  .kn-funnel-card {
+    flex: 0 0 200px;
+    width: 200px;
+  }
+}
+
+:deep(.el-dialog) {
+  @media (max-width: 768px) {
+    width: 94% !important;
+    max-width: 480px;
+    margin: 20px auto !important;
+    border-radius: 14px;
+
+    .el-dialog__header {
+      padding: 16px 16px 10px;
+      margin-right: 0;
+    }
+
+    .el-dialog__body {
+      padding: 12px 16px;
+    }
+
+    .el-dialog__footer {
+      padding: 10px 16px 16px;
+      display: flex;
+      gap: 10px;
+
+      .el-button {
+        flex: 1;
+        margin-left: 0 !important;
+        height: 40px;
+        font-size: 13px;
+      }
+    }
   }
 }
 </style>
