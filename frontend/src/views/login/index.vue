@@ -133,6 +133,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/user';
+import { checkRateLimit } from '@/utils/security';
 import { ElMessage } from 'element-plus';
 import {
   ShieldCheck,
@@ -340,6 +341,20 @@ const fillPreset = (code: string) => {
 
 const submitLogin = async () => {
   if (fullCode.value.length !== 8 || isSubmitting.value) return;
+
+  // Anti-Brute Force / Rate Limit Defense
+  if (!checkRateLimit('login_pin_attempt', 5, 10000)) {
+    errorMessage.value = 'Слишком частые попытки ввода. Подождите 10 секунд.';
+    triggerShake();
+    return;
+  }
+
+  // Strict numeric format enforcement
+  if (!/^\d{8}$/.test(fullCode.value)) {
+    errorMessage.value = 'Код безопасности должен состоять ровно из 8 цифр';
+    triggerShake();
+    return;
+  }
 
   isSubmitting.value = true;
   errorMessage.value = '';

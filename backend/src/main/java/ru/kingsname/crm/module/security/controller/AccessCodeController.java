@@ -15,6 +15,7 @@ import java.util.Map;
 
 /**
  * Controller for KINGSNAME 8-Digit Access Code Security & Authentication
+ * Hardened with Role-Based Access Control (Admin-only code generation & log inspection)
  */
 @RestController
 @RequestMapping("/admin-api/kings")
@@ -59,10 +60,13 @@ public class AccessCodeController {
     }
 
     /**
-     * 3. Admin: Generate new 8-digit access code
+     * 3. Admin: Generate new 8-digit access code (Protected)
      */
     @PostMapping("/security/codes/generate")
     public CommonResult<KingsAccessCodeDO> generateCode(@RequestBody GenerateCodeReq req, Authentication auth) {
+        if (!isAdmin(auth)) {
+            return CommonResult.error(403, "Доступ запрещен: генерация кодов доступна только Администратору");
+        }
         String creator = auth != null ? String.valueOf(auth.getPrincipal()) : "ADMIN";
         KingsAccessCodeDO created = accessCodeService.generateCode(
                 req.getUserName(), req.getRoleCode(), req.getValidType(), creator
@@ -71,33 +75,50 @@ public class AccessCodeController {
     }
 
     /**
-     * 4. Admin: List access codes with pagination
+     * 4. Admin: List access codes with pagination (Protected)
      */
     @GetMapping("/security/codes/page")
     public CommonResult<PageResult<KingsAccessCodeDO>> getCodePage(
             @RequestParam(defaultValue = "1") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            Authentication auth) {
+        if (!isAdmin(auth)) {
+            return CommonResult.error(403, "Доступ запрещен: просмотр реестра кодов доступен только Администратору");
+        }
         return CommonResult.success(accessCodeService.getCodePage(pageNo, pageSize));
     }
 
     /**
-     * 5. Admin: Revoke / deactivate code
+     * 5. Admin: Revoke / deactivate code (Protected)
      */
     @PostMapping("/security/codes/revoke")
     public CommonResult<Boolean> revokeCode(@RequestBody RevokeCodeReq req, Authentication auth) {
+        if (!isAdmin(auth)) {
+            return CommonResult.error(403, "Доступ запрещен: отзыв кодов доступен только Администратору");
+        }
         String updater = auth != null ? String.valueOf(auth.getPrincipal()) : "ADMIN";
         accessCodeService.revokeCode(req.getId(), updater);
         return CommonResult.success(true);
     }
 
     /**
-     * 6. Admin: Audit logs of all authentication attempts
+     * 6. Admin: Audit logs of all authentication attempts (Protected)
      */
     @GetMapping("/security/logs/page")
     public CommonResult<PageResult<SysLoginLogDO>> getLoginLogs(
             @RequestParam(defaultValue = "1") int pageNo,
-            @RequestParam(defaultValue = "20") int pageSize) {
+            @RequestParam(defaultValue = "20") int pageSize,
+            Authentication auth) {
+        if (!isAdmin(auth)) {
+            return CommonResult.error(403, "Доступ запрещен: просмотр логов безопасности доступен только Администратору");
+        }
         return CommonResult.success(accessCodeService.getLoginLogs(pageNo, pageSize));
+    }
+
+    private boolean isAdmin(Authentication auth) {
+        if (auth == null) return false;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equalsIgnoreCase(a.getAuthority()));
     }
 
     private String getClientIp(HttpServletRequest request) {

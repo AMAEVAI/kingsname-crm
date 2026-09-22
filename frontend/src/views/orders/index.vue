@@ -728,6 +728,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from '@/utils/request';
 import { useResponsive } from '@/utils/useResponsive';
+import { sanitizeInput, sanitizePhone, checkRateLimit } from '@/utils/security';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Search,
@@ -885,12 +886,25 @@ const openDrawerForEdit = (row: any) => {
 };
 
 const saveOrder = async () => {
-  if (!form.value.clientName || !form.value.clientPhone) {
+  if (!checkRateLimit('save_order_action', 5, 10000)) {
+    ElMessage.warning('Слишком много запросов. Подождите несколько секунд.');
+    return;
+  }
+
+  const rawName = form.value.clientName?.trim();
+  const rawPhone = form.value.clientPhone?.trim();
+
+  if (!rawName || !rawPhone) {
     ElMessage.warning('Заполните обязательные поля: Имя и Телефон клиента');
     return;
   }
 
+  form.value.clientName = sanitizeInput(rawName, 100);
+  form.value.clientPhone = sanitizePhone(rawPhone);
+  form.value.monogram = sanitizeInput(form.value.monogram, 30);
+  form.value.tailorNotes = sanitizeInput(form.value.tailorNotes, 1500);
   form.value.balanceAmount = calculatedBalance.value;
+
   await api.saveOrder(form.value);
   drawerVisible.value = false;
   ElMessage.success(isEdit.value ? 'Заказ успешно обновлен' : 'Новый заказ Bespoke создан!');

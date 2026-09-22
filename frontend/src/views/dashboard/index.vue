@@ -328,6 +328,12 @@
     <!-- Quick Lead Modal (Multi-Channel) -->
     <el-dialog v-model="quickLeadVisible" title="Быстрая фиксация заявки (Лида)" :width="modalWidth">
       <el-form :model="leadForm" label-position="top">
+        <!-- Invisible Honeypot Trap for automated spam bots -->
+        <div class="kn-hp-field" aria-hidden="true" style="position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; overflow: hidden; z-index: -999;">
+          <label for="lead_hp">Leave empty</label>
+          <input id="lead_hp" v-model="leadForm.hp" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
         <el-form-item label="Канал обращения">
           <el-select v-model="leadForm.channel" style="width: 100%">
             <el-option label="Instagram (@kingsname)" value="INSTAGRAM" />
@@ -368,6 +374,12 @@
     <!-- Quick Appointment Modal -->
     <el-dialog v-model="appointmentVisible" title="Запись на примерку в салон (г. Грозный)" :width="modalWidth">
       <el-form :model="appointForm" label-position="top">
+        <!-- Invisible Honeypot Trap for automated spam bots -->
+        <div class="kn-hp-field" aria-hidden="true" style="position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; overflow: hidden; z-index: -999;">
+          <label for="appoint_hp">Leave empty</label>
+          <input id="appoint_hp" v-model="appointForm.hp" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
         <el-form-item label="ФИО Клиента">
           <el-input v-model="appointForm.name" placeholder="ФИО" />
         </el-form-item>
@@ -399,6 +411,7 @@ import { ref, onMounted, onUnmounted, nextTick, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
 import { useResponsive } from '@/utils/useResponsive';
+import { sanitizeInput, sanitizePhone, sanitizeInstagram, checkRateLimit, isHoneypotTriggered } from '@/utils/security';
 import { ElMessage } from 'element-plus';
 import * as echarts from 'echarts';
 
@@ -439,6 +452,7 @@ const leadForm = ref({
   phone: '',
   productType: 'Костюм-тройка',
   tailorNotes: '',
+  hp: '', // Honeypot trap for spam bots
 });
 
 const appointForm = ref({
@@ -446,6 +460,7 @@ const appointForm = ref({
   phone: '',
   date: '',
   product: 'Костюм-тройка',
+  hp: '', // Honeypot trap for spam bots
 });
 
 // 6-Stage Bespoke Sales Funnel Definition
@@ -614,25 +629,51 @@ const openQuickLeadModal = () => {
     phone: '',
     productType: 'Костюм-тройка',
     tailorNotes: '',
+    hp: '',
   };
   quickLeadVisible.value = true;
 };
 
 const saveQuickLead = async () => {
-  if (!leadForm.value.name || !leadForm.value.phone) {
+  // 1. Invisible Bot Honeypot Protection
+  if (isHoneypotTriggered(leadForm.value.hp)) {
+    quickLeadVisible.value = false;
+    ElMessage.success('Заявка успешно зафиксирована в воронке продаж!');
+    return;
+  }
+
+  // 2. Sliding-Window Rate Limiting (Anti-DDoS / Form Flooding)
+  if (!checkRateLimit('quick_lead_submit', 3, 15000)) {
+    ElMessage.warning('Слишком много запросов. Подождите несколько секунд перед повторной отправкой.');
+    return;
+  }
+
+  const rawName = leadForm.value.name?.trim();
+  const rawPhone = leadForm.value.phone?.trim();
+
+  if (!rawName || !rawPhone) {
     ElMessage.warning('Пожалуйста, заполните имя и телефон');
     return;
   }
+
+  // 3. XSS Sanitization & Data Normalization
+  const safeName = sanitizeInput(rawName, 100);
+  const safePhone = sanitizePhone(rawPhone);
+  const safeInstagram = sanitizeInstagram(leadForm.value.instagram);
+  const safeNotes = sanitizeInput(leadForm.value.tailorNotes, 1000);
+  const safeChannel = sanitizeInput(leadForm.value.channel || 'INSTAGRAM', 30);
+  const safeProduct = sanitizeInput(leadForm.value.productType || 'Костюм-тройка', 60);
+
   await api.saveOrder({
-    clientName: leadForm.value.name,
-    clientPhone: leadForm.value.phone,
-    channel: leadForm.value.channel || 'INSTAGRAM',
-    productType: leadForm.value.productType,
+    clientName: safeName,
+    clientPhone: safePhone,
+    channel: safeChannel,
+    productType: safeProduct,
     orderType: 'BESPOKE',
     status: 'LEAD',
     totalAmount: 150000,
     depositAmount: 0,
-    tailorNotes: `Лид (${leadForm.value.channel}${leadForm.value.instagram ? ' ' + leadForm.value.instagram : ''}): ${leadForm.value.tailorNotes}`,
+    tailorNotes: `Лид (${safeChannel}${safeInstagram ? ' ' + safeInstagram : ''}): ${safeNotes}`,
   });
 
   quickLeadVisible.value = false;
@@ -646,20 +687,43 @@ const openAppointmentModal = () => {
     phone: '',
     date: '',
     product: 'Костюм-тройка',
+    hp: '',
   };
   appointmentVisible.value = true;
 };
 
 const saveAppointment = async () => {
-  if (!appointForm.value.name || !appointForm.value.phone) {
+  // 1. Invisible Bot Honeypot Protection
+  if (isHoneypotTriggered(appointForm.value.hp)) {
+    appointmentVisible.value = false;
+    ElMessage.success('Клиент успешно записан на примерку в салон!');
+    return;
+  }
+
+  // 2. Sliding-Window Rate Limiting
+  if (!checkRateLimit('appointment_submit', 3, 15000)) {
+    ElMessage.warning('Слишком много запросов. Подождите несколько секунд перед повторной отправкой.');
+    return;
+  }
+
+  const rawName = appointForm.value.name?.trim();
+  const rawPhone = appointForm.value.phone?.trim();
+
+  if (!rawName || !rawPhone) {
     ElMessage.warning('Пожалуйста, заполните имя и телефон');
     return;
   }
+
+  // 3. XSS Sanitization & Data Normalization
+  const safeName = sanitizeInput(rawName, 100);
+  const safePhone = sanitizePhone(rawPhone);
+  const safeProduct = sanitizeInput(appointForm.value.product || 'Костюм-тройка', 60);
+
   await api.saveOrder({
-    clientName: appointForm.value.name,
-    clientPhone: appointForm.value.phone,
+    clientName: safeName,
+    clientPhone: safePhone,
     channel: 'SALON_GROZNY',
-    productType: appointForm.value.product,
+    productType: safeProduct,
     orderType: 'BESPOKE',
     status: 'APPOINTMENT',
     totalAmount: 180000,

@@ -29,7 +29,7 @@ mybatis-plus:
 kingsname:
   security:
     jwt:
-      secret: KINGSNAME_BESPOKE_SARTORIAL_GROZNY_SECRET_KEY_2026_SECURITY_TOKEN_HASH
+      secret: ${JWT_SECRET:KINGSNAME_BESPOKE_SARTORIAL_GROZNY_SECRET_KEY_2026_SECURITY_TOKEN_HASH}
       expiration-seconds: 86400 # 24 hours
     code:
       default-master-code: "88888888"

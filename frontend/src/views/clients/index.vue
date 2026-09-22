@@ -161,6 +161,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '@/utils/request';
 import { useResponsive } from '@/utils/useResponsive';
+import { sanitizeInput, sanitizePhone, sanitizeInstagram, checkRateLimit } from '@/utils/security';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Search,
@@ -250,11 +251,29 @@ const openEditClient = (client: any) => {
 };
 
 const saveClient = async () => {
-  if (!clientForm.value.name || !clientForm.value.phone) {
+  if (!checkRateLimit('save_client_action', 5, 10000)) {
+    ElMessage.warning('Слишком много запросов. Подождите несколько секунд.');
+    return;
+  }
+
+  const rawName = clientForm.value.name?.trim();
+  const rawPhone = clientForm.value.phone?.trim();
+
+  if (!rawName || !rawPhone) {
     ElMessage.warning('Заполните обязательные поля: ФИО и Телефон');
     return;
   }
-  await api.saveClient(clientForm.value);
+
+  const safeClient = {
+    ...clientForm.value,
+    name: sanitizeInput(rawName, 100),
+    phone: sanitizePhone(rawPhone),
+    city: sanitizeInput(clientForm.value.city, 60),
+    instagram: sanitizeInstagram(clientForm.value.instagram),
+    notes: sanitizeInput(clientForm.value.notes, 1000),
+  };
+
+  await api.saveClient(safeClient);
   clientModalVisible.value = false;
   ElMessage.success(isEdit.value ? 'Данные клиента обновлены' : 'Клиент успешно добавлен в базу KINGSNAME!');
   await loadClients();
